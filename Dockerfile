@@ -1,27 +1,29 @@
-# Using linux with python
-FROM python:3.11-slim
+ARG PYTHON_VERSION=3.13-slim
 
-# Set working directory
-WORKDIR /app
+FROM python:${PYTHON_VERSION}
 
-# Install curl
-RUN apt-get update && apt-get install -y curl
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Install node through nodesource (better)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
+# install psycopg2 dependencies.
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY package.json package-lock.json ./
-RUN npm ci 
+RUN mkdir -p /code
 
-# Copy code all app code (backend, frontend, etc.)
-COPY . .
+WORKDIR /code
+
+COPY requirements.txt /tmp/requirements.txt
+RUN set -ex && \
+    pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt && \
+    rm -rf /root/.cache/
+COPY . /code
 
 RUN python manage.py collectstatic --noinput
 
-# Expose port and run app
 EXPOSE 8000
-CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
+
+CMD ["gunicorn","--bind",":8000","--workers","2","backend.wsgi"]
