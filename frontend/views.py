@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.utils.text import slugify
 import pandas as pd
 import random
 import time
@@ -21,6 +22,14 @@ def search_countries(request):
         filtered_countries = countries
     time.sleep(0.3)
     return render(request, "list.html", context={'countries': filtered_countries })
+
+def country(request, country_name):
+    chosen_country = [country for country in countries if slugify(country['Country']) == country_name]
+    if chosen_country:
+        print(chosen_country[0])
+        return render(request, 'country.html', context={'chosen_country': chosen_country[0]})
+    else:
+        redirect("/")
 
 def quiz(request):
     if request.method == "GET":

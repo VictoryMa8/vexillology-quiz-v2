@@ -11,12 +11,14 @@
     <div>
       <h1 class="text-4xl md:text-6xl font-bold">Welcome to Curious Vexillologist!</h1>
       <p class="py-4 text-4xl">
-        Start quizzing yourself or review the world's countries below! 👇🤓
+        Start quizzing yourself or review the world's countries below! 👇🤓 Tap on one to learn more 🌎
       </p>
       <a href="{% url 'quiz' %}" class="btn btn-success text-4xl rounded-2xl p-6">Quiz!</a>
     </div>
   </div>
 </div>
+
+<span id="spinner" class="htmx-indicator loading loading-dots loading-xl mb-4"></span>
 
 <label class="input input-xl">
   <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -43,8 +45,6 @@
     hx-indicator="#spinner"
   />
 </label>
-
-<span id="spinner" class="htmx-indicator loading loading-dots loading-xl mt-4 mb-0"></span>
 
 <div id="list" class="flex flex-wrap self-start mx-8 mt-8 md:ml-24 mb-24 gap-6">
 {% include 'list.html' %}

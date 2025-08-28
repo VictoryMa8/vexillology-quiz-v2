@@ -3,9 +3,10 @@
 {% block content %}
 <h1 class="text-4xl m-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
 
+<div class="flex flex-col justify-center items-center border-success border-1 rounded-2xl p-8 min-w-4/5 mx-4">
 {% if random_country %}
 <h1 class="text-8xl">{{ random_country.Flag }}</h1>
-<h1 class="text-4xl mt-8 font-bold">What country is this?</h1>
+<h1 class="text-4xl mt-4 font-bold">What country is this?</h1>
 {% else %}
 <h1 class="text-2xl mt-8 font-bold">Error...</h1>
 {% endif %}
@@ -18,7 +19,8 @@
     <button type="submit" class="btn btn-success mt-4">Guess</button>
 </form>
 
-<h1 class="text-4xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
+<h1 class="text-3xl mt-16 font-bold">Current Streak: {{ streak }}🔥</h1>
 <h1 class="text-4xl mt-8 font-bold">{{ message }}</h1>
+</div>
 
 {% endblock %}
