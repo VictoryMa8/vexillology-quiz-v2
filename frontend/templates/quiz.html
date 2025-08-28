@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-4xl m-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
+
+{% if random_country %}
+<h1 class="text-8xl">{{ random_country.Flag }}</h1>
+<h1 class="text-4xl mt-8 font-bold">What country is this?</h1>
+{% else %}
+<h1 class="text-2xl mt-8 font-bold">Error...</h1>
+{% endif %}
+
+<form class="flex flex-col items-center justify-center mt-4" method="post" action="{% url 'quiz' %}">
+    {% csrf_token %}
+    <input type="text" placeholder="Guess the country..." class="input input-success" name="guess" />
+    <input class="hidden" value="{{ random_country.Country }}" name="truth" />
+    <input class="hidden" value="{{ streak }}" name="streak" />
+    <button type="submit" class="btn btn-success mt-4">Guess</button>
+</form>
+
+<h1 class="text-4xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
+<h1 class="text-4xl mt-8 font-bold">{{ message }}</h1>
+
+{% endblock %}

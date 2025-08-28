@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %} Home {% endblock %}
+
+{% block content %}
+
+<div class="hero min-h-.5 mb-8">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    {% load static %}
+    <img class="mt-8 h-80 bg-white rounded-4xl" src="{% static 'assets/images/logo2.png' %}">
+    <div>
+      <h1 class="text-4xl md:text-6xl font-bold">Welcome to Curious Vexillologist!</h1>
+      <p class="py-4 text-4xl">
+        Start quizzing yourself or review the world's countries below! 👇🤓
+      </p>
+      <a href="{% url 'quiz' %}" class="btn btn-success text-4xl rounded-2xl p-6">Quiz!</a>
+    </div>
+  </div>
+</div>
+
+<label class="input input-xl">
+  <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      stroke-width="2.5"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </g>
+  </svg>
+  <input
+    type="text"
+    placeholder="Search for a country..."
+    name="search_countries"
+    hx-get="{% url 'search_countries' %}"
+    hx-trigger="keyup changed"
+    hx-target="#list"
+  />
+</label>
+
+<div id="list" class="opacity-100 flex flex-wrap self-start mx-8 mt-8 md:ml-24 mb-24 gap-6">
+    {% include 'list.html' %}
+</div>
+
+{% endblock %}
