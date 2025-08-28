@@ -1,3 +1,4 @@
+{% load django_htmx %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,10 +8,10 @@
     <title>{% block title %}Vexillology Quiz{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'assets/styles/output.css' %}" />
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
+    {% htmx_script %}
 </head>
 
-<body class="flex flex-col justify-center items-center">
+<body class="flex flex-col justify-center items-center" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 {% include 'nav.html' %}
 
 {% block content %}

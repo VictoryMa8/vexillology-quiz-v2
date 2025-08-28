@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import pandas as pd
 import random
+import time
 
 # Create your views here.
 
@@ -18,7 +19,7 @@ def search_countries(request):
         filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
     else:
         filtered_countries = countries
-
+    time.sleep(0.3)
     return render(request, "list.html", context={'countries': filtered_countries })
 
 def quiz(request):

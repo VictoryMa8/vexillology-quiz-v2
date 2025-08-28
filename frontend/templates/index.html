@@ -38,11 +38,16 @@
     hx-get="{% url 'search_countries' %}"
     hx-trigger="keyup changed"
     hx-target="#list"
+    hx-on::before-request="document.getElementById('list').style.opacity = 0.3;"
+    hx-on::after-request="document.getElementById('list').style.opacity = 1;"
+    hx-indicator="#spinner"
   />
 </label>
 
-<div id="list" class="opacity-100 flex flex-wrap self-start mx-8 mt-8 md:ml-24 mb-24 gap-6">
-    {% include 'list.html' %}
+<span id="spinner" class="htmx-indicator loading loading-dots loading-xl mt-4 mb-0"></span>
+
+<div id="list" class="flex flex-wrap self-start mx-8 mt-8 md:ml-24 mb-24 gap-6">
+{% include 'list.html' %}
 </div>
 
 {% endblock %}

@@ -1,5 +1,12 @@
 asgiref==3.9.1
 Django==5.2.5
+django-htmx==1.23.2
+numpy==2.3.2
+pandas==2.3.2
 psycopg2-binary==2.9.10
+python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
+pytz==2025.2
+six==1.17.0
 sqlparse==0.5.3
+tzdata==2025.2
