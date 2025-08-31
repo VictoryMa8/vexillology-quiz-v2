@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.utils.text import slugify
-import pandas as pd
+import csv
 import random
 import time
+import os
 
 # Create your views here.
 
-csv = pd.read_csv('./frontend/static/assets/countries.csv')
-countries = csv.to_dict(orient='records')
+with open(os.path.join(settings.BASE_DIR, 'frontend', 'static', 'assets', 'countries.csv'), 'r', encoding='utf-8') as file:
+    reader = csv.DictReader(file)
+    countries = list(reader)
 
 def index(request):
     return render(request, 'index.html', context={'countries': countries })
@@ -20,7 +22,7 @@ def search_countries(request):
         filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
     else:
         filtered_countries = countries
-    time.sleep(0.2)
+    time.sleep(0.1)
     return render(request, "list.html", context={'countries': filtered_countries })
 
 def country(request, country_name):
@@ -29,7 +31,7 @@ def country(request, country_name):
         print(chosen_country[0])
         return render(request, 'country.html', context={'chosen_country': chosen_country[0]})
     else:
-        redirect("/")
+        return redirect("/")
 
 def quiz(request):
     if request.method == "GET":
