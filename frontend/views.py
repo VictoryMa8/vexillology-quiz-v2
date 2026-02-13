@@ -19,13 +19,26 @@ def search_countries(request):
     query = request.GET.get("search_countries", "")
     print(query)
     if query:
+        # List of countries where the country name starts with the stripped and lowercased query
         filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
     else:
         filtered_countries = countries
     time.sleep(0.1)
     return render(request, "list.html", context={'countries': filtered_countries })
 
+def search_guesses(request):
+    query = request.GET.get("guess", "")
+    print(query)
+    if query:
+        # List of countries where the country name starts with the stripped and lowercased query
+        filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
+    else:
+        filtered_countries = countries
+    time.sleep(0.1)
+    return render(request, "guesses.html", context={'countries': filtered_countries })
+
 def country(request, country_name):
+    # Slugify makes it a cleaner string
     chosen_country = [country for country in countries if slugify(country['Country']) == country_name]
     if chosen_country:
         print(chosen_country[0])
@@ -38,7 +51,7 @@ def quiz(request):
         random_country = random.choice(countries)
         print(f"New random country: {random_country['Country']}")
         streak = 0
-        return render(request, 'quiz.html', context={'random_country': random_country, 'streak': streak })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak })
 
     elif request.method == "POST":
         truth = request.POST.get('truth')
@@ -50,21 +63,21 @@ def quiz(request):
 
         if truth.lower() == guess.strip().lower():
             streak += 1
-            message = f"You're correct! The answer was {truth}!"
+            message = f"Correct 🥳 It was {truth}!"
             print(f"User is correct! Streak is now {streak}")
         
         else:
             streak = 0
-            message = f"Sadly that is incorrect... 😢 the answer was {truth}"
+            message = f"Noooo 😢 it was {truth}"
 
         random_country = random.choice(countries)
         print(f"New random country: {random_country['Country']}")
 
-        return render(request, 'quiz.html', context={'random_country': random_country, 'streak': streak, 'message': message })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
     
     else:
         streak = 0
-        return render(request, 'quiz.html', context={'random_country': random_country, 'streak': streak, 'message': message })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
 
 
 def about(request):

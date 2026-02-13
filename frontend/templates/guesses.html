@@ -1,0 +1,7 @@
+{% if countries %}
+    {% for country in countries %}
+        <button onclick="sendText('{{ country.Country }}')" value="{{ country.Country }}" href="{% url 'country' country_name=country.Country|slugify %}" class="text-4xl min-w-140 md:text-4xl border-1 border-success bg-success-content hover:cursor-pointer hover:bg-success hover:text-success-content transition duration-300 ease-in-out text-white p-4 rounded-2xl">{{ country.Country }}</button>
+    {% endfor %}
+{% else %}
+    <p class="text-4xl">No countries found... 😨</p>
+{% endif %}
