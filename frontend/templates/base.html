@@ -1,6 +1,6 @@
 {% load django_htmx %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -13,6 +13,11 @@
     <link rel="manifest" href="{% static 'assets/site.webmanifest' %}">
     <link rel="stylesheet" href="{% static 'assets/styles/output.css' %}" />
     {% htmx_script %}
+    <script>
+        // Get theme from local storage (other script block at the bottom of body)
+        const savedTheme = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
 </head>
 
 <body class="flex flex-col justify-center items-center" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
@@ -21,6 +26,8 @@
 {% block content %}
 
 {% endblock %}
+
+{% include 'footer.html' %}
 </body>
 
 </html>

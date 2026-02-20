@@ -1,0 +1,25 @@
+<footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get theme contorller and current theme
+            const themeController = document.getElementById('theme-controller');
+            const currentTheme = document.documentElement.getAttribute('data-theme')
+
+            // Controller is checked if the current theme light
+            themeController.checked = currentTheme === 'light';
+
+            // If controller is clicked...
+            themeController.addEventListener('change', (event) => {
+                // If controller is checked, set theme to light
+                if (event.target.checked) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    // If controller is not checked, set theme to dark
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            })
+        });
+    </script>
+</footer>

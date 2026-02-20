@@ -4,6 +4,7 @@ from django.utils.text import slugify
 import csv
 import random
 import time
+import ast
 import os
 
 # Create your views here.
@@ -51,29 +52,42 @@ def quiz(request):
         random_country = random.choice(countries)
         print(f"New random country: {random_country['Country']}")
         streak = 0
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak })
+        collected_flags = []
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'collected_flags': collected_flags })
 
     elif request.method == "POST":
-        truth = request.POST.get('truth')
+        # ast.literal_eval() allows us to turn the string into a dictionary (of the country)
+        truth = ast.literal_eval(request.POST.get('truth'))
+        truth_name = truth['Country']
+        truth_flag = truth['Flag']
+
+        collected_flags = request.POST.get('collected_flags')
+        print(collected_flags)
+
         guess = request.POST.get('guess')
         streak = int(request.POST.get('streak'))
 
-        print(f"Seeing if {guess} is the same as {truth}...")
+        print(f"Seeing if {guess} is the same as {truth_name}...")
         print(f"Streak: {streak}")
 
-        if truth.lower() == guess.strip().lower():
+        if truth_name.lower() == guess.strip().lower():
             streak += 1
-            message = f"Correct 🥳 It was {truth}!"
+            if collected_flags:
+                collected_flags.append(truth_flag)
+            else:
+                collected_flags = [truth_flag]
+            message = f"Correct 🥳 It was {truth_name}!"
             print(f"User is correct! Streak is now {streak}")
         
         else:
             streak = 0
-            message = f"Noooo 😢 it was {truth}"
+            collected_flags = []
+            message = f"Noooo 😢 it was {truth_name}"
 
         random_country = random.choice(countries)
         print(f"New random country: {random_country['Country']}")
 
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags })
     
     else:
         streak = 0

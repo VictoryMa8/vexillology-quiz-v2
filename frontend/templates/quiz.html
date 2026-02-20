@@ -26,13 +26,20 @@
             hx-on::before-request="document.getElementById('list').style.opacity = 0.3;"
             hx-on::after-request="document.getElementById('list').style.opacity = 1;"
             />
-            <input class="hidden" value="{{ random_country.Country }}" name="truth" />
+            <input class="hidden" value="{{ random_country }}" name="truth" />
             <input class="hidden" value="{{ streak }}" name="streak" />
             <button type="submit" class="btn btn-success mt-4">Guess</button>
         </form>
 
         <h1 class="text-3xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
-        <h1 class="text-4xl mt-8 font-bold text-center">{{ message }} 😎</h1>
+        <h1 class="text-4xl mt-8 font-bold text-center">{{ message }}</h1>
+        <div class="text-3xl mt-8 font-bold text-center" value="{{ collected_flags }}" name="collected_flags">
+            {% if countries %}
+                {% for flag in collected_flags %}
+                    {{ flag }}
+                {% endfor %}
+            {% endif %}
+        </div>
     </div>
 
     <div id="guesses" class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 w-150 mb-24 gap-6 min-h-130">
@@ -44,7 +51,7 @@
             
         function sendText(text) {
             input.value = text
-            input.classList.add('bg-success-content')
+            input.classList.add('bg-success')
             input.focus()
         }
     </script>
