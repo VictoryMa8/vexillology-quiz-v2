@@ -58,17 +58,12 @@ def quiz(request):
     elif request.method == "POST":
         # ast.literal_eval() allows us to turn the string into a dictionary (of the country)
         truth = ast.literal_eval(request.POST.get('truth'))
-        truth_name = truth['Country']
-        truth_flag = truth['Flag']
-
-        collected_flags = request.POST.get('collected_flags')
-        print(collected_flags)
-
+        collected_flags = ast.literal_eval(request.POST.get('collected_flags'))
         guess = request.POST.get('guess')
         streak = int(request.POST.get('streak'))
 
-        print(f"Seeing if {guess} is the same as {truth_name}...")
-        print(f"Streak: {streak}")
+        truth_name = truth['Country']
+        truth_flag = truth['Flag']
 
         if truth_name.lower() == guess.strip().lower():
             streak += 1

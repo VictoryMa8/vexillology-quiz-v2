@@ -4,40 +4,46 @@
 <h1 class="text-4xl m-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
 
 <div class="flex flex-col md:flex-row">
-    <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
-        {% if random_country %}
-        <h1 class="text-8xl">{{ random_country.Flag }}</h1>
-        <h1 class="text-4xl mt-4 font-bold">What country is this?</h1>
-        {% else %}
-        <h1 class="text-2xl mt-8 font-bold">Error...</h1>
-        {% endif %}
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
+            {% if random_country %}
+            <h1 class="text-8xl">{{ random_country.Flag }}</h1>
+            <h1 class="text-4xl mt-4 font-bold">What country is this?</h1>
+            {% else %}
+            <h1 class="text-2xl mt-8 font-bold">Error...</h1>
+            {% endif %}
 
-        <form class="flex flex-col items-center justify-center mt-4" method="post" action="{% url 'quiz' %}">
-            {% csrf_token %}
-            <input 
-            id="guess"
-            type="text"
-            placeholder="Guess the country..." 
-            class="input input-success" 
-            name="guess" 
-            hx-get="{% url 'search_guesses' %}"
-            hx-trigger="keyup changed"
-            hx-target="#guesses"
-            hx-on::before-request="document.getElementById('list').style.opacity = 0.3;"
-            hx-on::after-request="document.getElementById('list').style.opacity = 1;"
-            />
-            <input class="hidden" value="{{ random_country }}" name="truth" />
-            <input class="hidden" value="{{ streak }}" name="streak" />
-            <button type="submit" class="btn btn-success mt-4">Guess</button>
-        </form>
+            <form class="flex flex-col items-center justify-center mt-4" method="post" action="{% url 'quiz' %}">
+                {% csrf_token %}
+                <input 
+                id="guess"
+                type="text"
+                placeholder="Guess the country..." 
+                class="input input-success" 
+                name="guess" 
+                hx-get="{% url 'search_guesses' %}"
+                hx-trigger="keyup changed"
+                hx-target="#guesses"
+                hx-on::before-request="document.getElementById('list').style.opacity = 0.3;"
+                hx-on::after-request="document.getElementById('list').style.opacity = 1;"
+                />
+                <input class="hidden" value="{{ random_country }}" name="truth" />
+                <input class="hidden" value="{{ streak }}" name="streak" />
+                <input class="hidden" value="{{ collected_flags }}" name="collected_flags">
+                <button type="submit" class="btn btn-success mt-4">Guess</button>
+            </form>
 
-        <h1 class="text-3xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
-        <h1 class="text-4xl mt-8 font-bold text-center">{{ message }}</h1>
-        <div class="text-3xl mt-8 font-bold text-center" value="{{ collected_flags }}" name="collected_flags">
+            <h1 class="text-3xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
+            <h1 class="text-4xl mt-8 font-bold text-center">{{ message }}</h1>
+        </div>
+        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
+            <h1 class="text-4xl font-bold">Collected Flags 🚩</h1>
             {% if countries %}
-                {% for flag in collected_flags %}
-                    {{ flag }}
-                {% endfor %}
+                <div class="flex flex-wrap items-center">
+                    {% for flag in collected_flags %}
+                        <h1 class="text-6xl mt-4 text-center">{{ flag }}</h1>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
     </div>
