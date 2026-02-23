@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-4xl m-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
+<h1 class="text-4xl mt-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
+<h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: <span id="highscore"></span></h1>
 
 <div class="flex flex-col md:flex-row">
     <div class="flex flex-col gap-4">
@@ -24,8 +25,8 @@
                 hx-get="{% url 'search_guesses' %}"
                 hx-trigger="keyup changed"
                 hx-target="#guesses"
-                hx-on::before-request="document.getElementById('list').style.opacity = 0.3;"
-                hx-on::after-request="document.getElementById('list').style.opacity = 1;"
+                hx-on::before-request="document.getElementById('guesses').style.opacity = 0.3;"
+                hx-on::after-request="document.getElementById('guesses').style.opacity = 1;"
                 />
                 <input class="hidden" value="{{ random_country }}" name="truth" />
                 <input class="hidden" value="{{ streak }}" name="streak" />
@@ -60,6 +61,28 @@
             input.classList.add('bg-success')
             input.focus()
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let streak = {{ streak }};
+            let highscore = parseInt(localStorage.getItem('high-score'))
+            let highscoreText = document.getElementById('highscore');
+
+            if (highscore) {
+                if (streak > highscore) {
+                    localStorage.setItem('high-score', streak);
+                    highscoreText.textContent = `${streak}`
+                    console.log('Highscore updated: ', streak);
+                }
+                else {
+                    highscoreText.textContent = highscore;
+                    console.log('Current highscore: ', highscore);
+                }
+            }
+            else {
+                localStorage.setItem('high-score', 0)
+                highscoreText.textContent = 0
+            }
+        });
     </script>
 </div>
 

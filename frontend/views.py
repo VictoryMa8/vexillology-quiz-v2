@@ -24,7 +24,7 @@ def search_countries(request):
         filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
     else:
         filtered_countries = countries
-    time.sleep(0.1)
+    time.sleep(0.075)
     return render(request, "list.html", context={'countries': filtered_countries })
 
 def search_guesses(request):
