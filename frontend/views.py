@@ -109,15 +109,9 @@ def quiz(request):
         streak = 0
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
     
-@login_required
 def about(request):
     return render(request, 'about.html')
 
-@login_required
-def contact(request):
-    return render(request, 'contact.html')
-
-@login_required
 def contact(request):
     return render(request, 'contact.html')
 
