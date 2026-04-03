@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.utils.text import slugify
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from .forms import VexillologistCreationForm
 import csv
 import random
 import time
@@ -8,6 +11,7 @@ import ast
 import os
 
 # Create your views here.
+# Users who are not logged in can only access index, signup, and login
 
 with open(os.path.join(settings.BASE_DIR, 'frontend', 'static', 'assets', 'countries.csv'), 'r', encoding='utf-8') as file:
     reader = csv.DictReader(file)
@@ -16,6 +20,20 @@ with open(os.path.join(settings.BASE_DIR, 'frontend', 'static', 'assets', 'count
 def index(request):
     return render(request, 'index.html', context={'countries': countries })
 
+def signup(request):
+    # On the sign up page, get the form with post
+    if request.method == 'POST':
+        form = VexillologistCreationForm(request.POST)
+        if form.is_valid():
+            # Put user info into database, login user, and redirect to index
+            user = form.save()
+            login(request, user)
+            return redirect('index')
+    else:
+        form = VexillologistCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+@login_required
 def search_countries(request):
     query = request.GET.get("search_countries", "")
     print(query)
@@ -27,6 +45,7 @@ def search_countries(request):
     time.sleep(0.075)
     return render(request, "list.html", context={'countries': filtered_countries })
 
+@login_required
 def search_guesses(request):
     query = request.GET.get("guess", "")
     print(query)
@@ -38,6 +57,7 @@ def search_guesses(request):
     time.sleep(0.1)
     return render(request, "guesses.html", context={'countries': filtered_countries })
 
+@login_required
 def country(request, country_name):
     # Slugify makes it a cleaner string
     chosen_country = [country for country in countries if slugify(country['Country']) == country_name]
@@ -47,6 +67,7 @@ def country(request, country_name):
     else:
         return redirect("/")
 
+@login_required
 def quiz(request):
     if request.method == "GET":
         random_country = random.choice(countries)
@@ -87,11 +108,16 @@ def quiz(request):
     else:
         streak = 0
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
-
-
+    
+@login_required
 def about(request):
     return render(request, 'about.html')
 
+@login_required
+def contact(request):
+    return render(request, 'contact.html')
+
+@login_required
 def contact(request):
     return render(request, 'contact.html')
 

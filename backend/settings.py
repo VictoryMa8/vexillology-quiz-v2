@@ -80,6 +80,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 AUTH_USER_MODEL = 'frontend.Vexillologist'
 
+# Self explanatory, after login/logout, send user to index
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
