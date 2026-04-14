@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.utils.text import slugify
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .forms import VexillologistCreationForm, VexillologistChangeForm
@@ -92,6 +93,7 @@ def quiz(request):
                 collected_flags.append(truth_flag)
             else:
                 collected_flags = [truth_flag]
+            messages.success(request, f"Correct 🥳 It was {truth_name}!")
             message = f"Correct 🥳 It was {truth_name}!"
             print(f"User is correct! Streak is now {streak}")
         
@@ -101,7 +103,6 @@ def quiz(request):
             message = f"Noooo 😢 it was {truth_name}"
 
         random_country = random.choice(countries)
-        print(f"New random country: {random_country['Country']}")
 
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags })
     
@@ -123,6 +124,8 @@ def settings(request):
         form = VexillologistChangeForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
+            # Using Django messages for success message
+            messages.success(request, 'Your settings have been saved!')
             return redirect('settings')
     else:
         form = VexillologistChangeForm(instance=request.user)

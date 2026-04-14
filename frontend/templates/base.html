@@ -23,6 +23,33 @@
 <body class="flex flex-col justify-center items-center" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 {% include 'nav.html' %}
 
+<!-- Notification pop-ups with Django messages -->
+{% if messages %}
+<div id="toast-container" class="toast toast-top toast-end z-0">
+    {% for message in messages %}
+    <div role="alert" class="alert alert-success shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <!-- Message content filled in here -->
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Toast will gently fade out after popping up
+    setTimeout(function() {
+        const container = document.getElementById('toast-container');
+        if (container) {
+            container.style.transition = "opacity 0.5s ease";
+            container.style.opacity = "0";
+            setTimeout(() => container.remove(), 500);
+        }
+    }, 3000);
+</script>
+{% endif %}
+
 {% block content %}
 
 {% endblock %}
