@@ -1,6 +1,48 @@
 {% extends 'base.html' %}
 
+{% block title %}Settings - Vexillology Quiz{% endblock %}
+
 {% block content %}
-<h1 class="text-4xl md:text-6xl mt-8 font-bold">Settings</h1>
-<h2 class="text-2xl md:text-4xl mt-8">Coming soon...</h2>
+<main class="flex flex-col items-center justify-center p-8 gap-4 w-9/10 md:w-3/4">
+    <h1 class="text-3xl font-bold">Settings</h1>
+    <form method="post" class="flex flex-col gap-4 bg-base-200 p-4 rounded-lg">
+        {% csrf_token %}
+        {% for field in form %}
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text font-medium">{{ field.label }}</span>
+                </div>
+                {{ field }}
+                {% if field.help_text %}
+                    <div class="label pb-0 justify-start">
+                        <div class="label-text-alt text-base-content whitespace-normal break-words text-left">{{ field.help_text }}</div>
+                    </div>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="label">
+                        <span class="label-text-alt text-error font-medium">{{ error }}</span>
+                    </div>
+                {% endfor %}
+            </label>
+        {% endfor %}
+        <button type="submit" class="btn btn-success mt-4 w-full">Save Changes</button>
+    </form>
+    
+    <div class="mt-4 flex flex-col gap-2 text-xl text-center bg-base-200 p-6 rounded-lg">
+        <h2 class="text-xl font-bold border-b border-base-300">Account Info</h2>
+        <p>Date Joined: {{ user.date_joined|date:"M d, Y" }}</p>
+        <p class="text-success font-bold">High Score: {{ user.high_score }}</p>
+        <p class="text-success font-bold">Games Played: {{ user.games_played }}</p>
+    </div>
+</main>
+
+<script>
+    // When DOM loads, give inputs DaisyUI classes to all form inputs
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputs = document.querySelectorAll("form input:not([type='hidden'])");
+        inputs.forEach(input => {
+            input.classList.add("input", "input-bordered", "w-full", "focus:outline-success");
+        });
+    });
+</script>
 {% endblock %}

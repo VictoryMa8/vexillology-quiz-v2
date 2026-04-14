@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.text import slugify
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from .forms import VexillologistCreationForm
+from .forms import VexillologistCreationForm, VexillologistChangeForm
 import csv
 import random
 import time
@@ -115,5 +115,15 @@ def about(request):
 def contact(request):
     return render(request, 'contact.html')
 
+@login_required
 def settings(request):
-    return render(request, 'settings.html')
+    if request.method == 'POST':
+        # 'instance' parameter tells the Django form which record to update
+        # Necessary since we are updating (current logged-in user) rather than creating
+        form = VexillologistChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('settings')
+    else:
+        form = VexillologistChangeForm(instance=request.user)
+    return render(request, 'settings.html', {'form': form})

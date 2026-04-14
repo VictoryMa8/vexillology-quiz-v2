@@ -7,3 +7,8 @@ class VexillologistCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Vexillologist
         fields = UserCreationForm.Meta.fields
+
+class VexillologistChangeForm(forms.ModelForm):
+    class Meta:
+        model = Vexillologist
+        fields = ('first_name', 'last_name')
