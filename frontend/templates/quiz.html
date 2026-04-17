@@ -9,7 +9,13 @@
     <div class="flex flex-col gap-4">
         <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
             {% if random_country %}
-            <h1 class="text-8xl">{{ random_country.Flag }}</h1>
+            <h1 class="text-8xl">
+                {% if random_country.flag_image_url %}
+                    <img src="{{ random_country.flag_image_url }}" class="h-[1em] object-contain drop-shadow-md inline-block rounded-md" alt="Flag">
+                {% else %}
+                    {{ random_country.Flag }}
+                {% endif %}
+            </h1>
             <h1 class="text-4xl mt-4 font-bold">What country is this?</h1>
             {% else %}
             <h1 class="text-2xl mt-8 font-bold">Error...</h1>
@@ -40,10 +46,16 @@
         </div>
         <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
             <h1 class="text-4xl font-bold">Collected Flags 🚩</h1>
-            {% if countries %}
+            {% if collections or collected_flags %}
                 <div class="flex flex-wrap items-center">
-                    {% for flag in collected_flags %}
-                        <h1 class="text-6xl mt-4 text-center">{{ flag }}</h1>
+                    {% for flag_url_or_emoji in collected_flags %}
+                        <h1 class="text-6xl mt-4 text-center">
+                            {% if flag_url_or_emoji|slice:":4" == "http" %}
+                                <img src="{{ flag_url_or_emoji }}" class="h-[1em] mx-1 inline-block drop-shadow-sm rounded-sm" alt="Flag">
+                            {% else %}
+                                {{ flag_url_or_emoji }}
+                            {% endif %}
+                        </h1>
                     {% endfor %}
                 </div>
             {% endif %}

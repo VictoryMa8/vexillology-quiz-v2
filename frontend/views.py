@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .forms import VexillologistCreationForm, VexillologistChangeForm
+from .models import Country
 import csv
 import random
 import time
@@ -14,11 +15,25 @@ import os
 # Create your views here.
 # Users who are not logged in can only access index, signup, and login
 
-with open(os.path.join(settings.BASE_DIR, 'frontend', 'static', 'assets', 'countries.csv'), 'r', encoding='utf-8') as file:
-    reader = csv.DictReader(file)
-    countries = list(reader)
+def get_countries():
+    # Providing the exact dictionary structure as the original CSV (just a text list of countries) to minimize app changes
+    return [
+        {
+            'Country': c.name,
+            'Flag': c.flag_emoji,
+            'flag_image_url': c.flag_image_url,
+            'Capital': c.capital,
+            'Population_2024': c.population,
+            'GDP_USD_Billions': c.gdp_usd_billions,
+            'Area_km2': c.area_km2,
+            'Official_Language': c.official_language,
+            'Region': c.region,
+        }
+        for c in Country.objects.all().order_by('name')
+    ]
 
 def index(request):
+    countries = get_countries()
     return render(request, 'index.html', context={'countries': countries })
 
 def signup(request):
@@ -36,6 +51,7 @@ def signup(request):
 
 @login_required
 def search_countries(request):
+    countries = get_countries()
     query = request.GET.get("search_countries", "")
     print(query)
     if query:
@@ -48,6 +64,7 @@ def search_countries(request):
 
 @login_required
 def search_guesses(request):
+    countries = get_countries()
     query = request.GET.get("guess", "")
     print(query)
     if query:
@@ -55,11 +72,11 @@ def search_guesses(request):
         filtered_countries = [country for country in countries if country['Country'].lower().startswith(query.strip().lower())]
     else:
         filtered_countries = countries
-    time.sleep(0.1)
     return render(request, "guesses.html", context={'countries': filtered_countries })
 
 @login_required
 def country(request, country_name):
+    countries = get_countries()
     # Slugify makes it a cleaner string
     chosen_country = [country for country in countries if slugify(country['Country']) == country_name]
     if chosen_country:
@@ -70,9 +87,10 @@ def country(request, country_name):
 
 @login_required
 def quiz(request):
+    countries = get_countries()
     if request.method == "GET":
-        random_country = random.choice(countries)
-        print(f"New random country: {random_country['Country']}")
+        random_country = random.choice(countries) if countries else None
+        print(f"New random country: {random_country['Country'] if random_country else 'None'}")
         streak = 0
         collected_flags = []
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'collected_flags': collected_flags })
@@ -85,7 +103,7 @@ def quiz(request):
         streak = int(request.POST.get('streak'))
 
         truth_name = truth['Country']
-        truth_flag = truth['Flag']
+        truth_flag = truth.get('flag_image_url') or truth['Flag']
 
         if truth_name.lower() == guess.strip().lower():
             streak += 1
@@ -109,12 +127,13 @@ def quiz(request):
             collected_flags = []
             message = f"Noooo 😢 it was {truth_name}"
 
-        random_country = random.choice(countries)
+        random_country = random.choice(countries) if countries else None
 
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags })
     
     else:
         streak = 0
+        random_country = random.choice(countries) if countries else None
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
     
 def about(request):
