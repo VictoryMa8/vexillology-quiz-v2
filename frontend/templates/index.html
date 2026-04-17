@@ -7,15 +7,15 @@
 <div class="hero min-h-.5 mb-8">
   <div class="hero-content flex-col lg:flex-row-reverse">
     {% load static %}
-    <img class="mt-8 h-80 bg-white rounded-4xl" src="{% static 'assets/images/logo2.png' %}">
+    <img class="mt-8 h-40 bg-white rounded-lg" src="{% static 'assets/images/vexillologists.png' %}">
     <div>
       {% if user.is_authenticated %}
-      <h1 class="text-4xl md:text-6xl font-bold">Welcome to Curious Vexillologist <span class="text-success">{{ user.username }}</span>!</h1>
+      <h1 class="text-4xl md:text-6xl font-bold">Welcome to Vexillologists.com <span class="text-success">{{ user.username }}</span>!</h1>
       <p class="py-4 text-4xl max-w-200">
         Start quizzing yourself or review the countries below! 👇🤓 Tap on one to learn more 🌎
       </p>
       {% else %}
-      <h1 class="text-4xl md:text-6xl font-bold">Welcome to Curious Vexillologist!</h1>
+      <h1 class="text-4xl md:text-6xl font-bold">Welcome to Vexillologists.com!</h1>
       <p class="py-4 text-4xl max-w-200">
         Please <a href="{% url 'login' %}" class="text-success hover:text-success-content transition duration-300 ease-in-out">login</a> to start quizzing yourself or review the countries below! 👇🤓 Tap on one to learn more 🌎
       </p>

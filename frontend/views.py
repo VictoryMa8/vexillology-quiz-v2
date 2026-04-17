@@ -24,7 +24,7 @@ def get_countries():
             'flag_image_url': c.flag_image_url,
             'Capital': c.capital,
             'Population_2024': c.population,
-            'GDP_USD_Billions': c.gdp_usd_billions,
+            'GDP_USD_Billions': float(c.gdp_usd_billions) if c.gdp_usd_billions is not None else None,
             'Area_km2': c.area_km2,
             'Official_Language': c.official_language,
             'Region': c.region,
