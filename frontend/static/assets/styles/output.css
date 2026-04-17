@@ -11,7 +11,7 @@
     --color-white: #fff;
     --spacing: 0.25rem;
     --container-sm: 24rem;
-    --container-5xl: 64rem;
+    --container-4xl: 56rem;
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
@@ -27,7 +27,6 @@
     --text-8xl: 6rem;
     --text-8xl--line-height: 1;
     --font-weight-medium: 500;
-    --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --radius-lg: 0.5rem;
     --radius-2xl: 1rem;
@@ -2013,9 +2012,6 @@
   .z-1 {
     z-index: 1;
   }
-  .z-50 {
-    z-index: 50;
-  }
   .hero {
     display: grid;
     width: 100%;
@@ -2366,9 +2362,6 @@
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
-  .h-8 {
-    height: calc(var(--spacing) * 8);
-  }
   .h-80 {
     height: calc(var(--spacing) * 80);
   }
@@ -2386,9 +2379,6 @@
   }
   .w-6 {
     width: calc(var(--spacing) * 6);
-  }
-  .w-8 {
-    width: calc(var(--spacing) * 8);
   }
   .w-9\/10 {
     width: calc(9/10 * 100%);

@@ -93,6 +93,13 @@ def quiz(request):
                 collected_flags.append(truth_flag)
             else:
                 collected_flags = [truth_flag]
+            
+            # Slight performance benefit with update_fields
+            user = request.user
+            if streak > user.high_score:
+                user.high_score = streak
+                user.save(update_fields=['high_score'])
+                
             messages.success(request, f"Correct 🥳 It was {truth_name}!")
             message = f"Correct 🥳 It was {truth_name}!"
             print(f"User is correct! Streak is now {streak}")

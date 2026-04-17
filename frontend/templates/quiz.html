@@ -2,7 +2,8 @@
 
 {% block content %}
 <h1 class="text-4xl mt-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
-<h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: <span id="highscore"></span></h1>
+<!-- django.template.context_processors.auth is a default context processor, that automatically makes the user variable available in all our templates rendered using render() -->
+<h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: {{ user.high_score }}</h1>
 
 <div class="flex flex-col md:flex-row">
     <div class="flex flex-col gap-4">
@@ -61,28 +62,6 @@
             input.classList.add('bg-success')
             input.focus()
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            let streak = {{ streak }};
-            let highscore = parseInt(localStorage.getItem('high-score'))
-            let highscoreText = document.getElementById('highscore');
-
-            if (highscore) {
-                if (streak > highscore) {
-                    localStorage.setItem('high-score', streak);
-                    highscoreText.textContent = `${streak}`
-                    console.log('Highscore updated: ', streak);
-                }
-                else {
-                    highscoreText.textContent = highscore;
-                    console.log('Current highscore: ', highscore);
-                }
-            }
-            else {
-                localStorage.setItem('high-score', 0)
-                highscoreText.textContent = 0
-            }
-        });
     </script>
 </div>
 
