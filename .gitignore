@@ -4,3 +4,4 @@ node_modules
 .DS_Store
 .vs_code
 __pycache__
+commands
