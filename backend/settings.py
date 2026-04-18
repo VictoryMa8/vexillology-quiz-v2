@@ -34,6 +34,19 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
+'''
+https://docs.djangoproject.com/en/6.0/ref/settings/
+
+"If your Django app is behind a proxy, the proxy may be “swallowing” whether the original request uses HTTPS or not. 
+
+If there is a non-HTTPS connection between the proxy and Django then is_secure() would always return False – even for requests that were made via HTTPS by the end user. 
+
+In contrast, if there is an HTTPS connection between the proxy and Django then is_secure() would always return True – even for requests that were made originally via HTTP.
+'''
+
+# Tell Django it's secure when sitting behind a reverse proxy (like Fly.io, what we're using)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Application definition
 
 INSTALLED_APPS = [
