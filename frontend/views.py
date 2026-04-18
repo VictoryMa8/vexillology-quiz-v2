@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.conf import settings
 from django.utils.text import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
-from .forms import VexillologistCreationForm, VexillologistChangeForm
+from django.contrib.auth import login as auth_login
+
+from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
 from .models import Country
 import csv
 import random
@@ -43,11 +43,21 @@ def signup(request):
         if form.is_valid():
             # Put user info into database, login user, and redirect to index
             user = form.save()
-            login(request, user)
+            auth_login(request, user)
             return redirect('index')
     else:
         form = VexillologistCreationForm()
     return render(request, 'signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            auth_login(request, form.user)
+            return redirect('index')
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
 
 @login_required
 def search_countries(request):
@@ -88,6 +98,7 @@ def country(request, country_name):
 @login_required
 def quiz(request):
     countries = get_countries()
+    message = ""
     if request.method == "GET":
         random_country = random.choice(countries) if countries else None
         print(f"New random country: {random_country['Country'] if random_country else 'None'}")

@@ -7,6 +7,9 @@
     <h1 class="text-3xl font-bold">Log In</h1>
     <form method="post" class="flex flex-col gap-4 w-full max-w-sm bg-base-200 p-6 rounded-lg">
         {% csrf_token %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-error text-sm">{{ error }}</div>
+        {% endfor %}
         {% for field in form %}
             <label class="form-control w-full">
                 <div class="label">
