@@ -43,7 +43,8 @@ def signup(request):
         if form.is_valid():
             # Put user info into database, login user, and redirect to index
             user = form.save()
-            auth_login(request, user)
+            # Need to tell Django whether its using ModelBackend or AuthenticationBackend (OAuth)
+            auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('index')
     else:
         form = VexillologistCreationForm()
@@ -53,13 +54,12 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            auth_login(request, form.user)
+            auth_login(request, form.user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('index')
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
-@login_required
 def search_countries(request):
     countries = get_countries()
     query = request.GET.get("search_countries", "")
@@ -167,3 +167,12 @@ def settings(request):
     else:
         form = VexillologistChangeForm(instance=request.user)
     return render(request, 'settings.html', {'form': form})
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.delete()
+        messages.success(request, 'Your account has been successfully deleted.')
+        return redirect('index')
+    return redirect('settings')

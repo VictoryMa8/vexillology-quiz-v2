@@ -15,5 +15,6 @@ urlpatterns = [
     path("quiz/", views.quiz, name="quiz"),
     path("about/", views.about, name="about"),
     path("contact/", views.contact, name="contact"),
-    path("settings/", views.settings, name="settings")
+    path("settings/", views.settings, name="settings"),
+    path("settings/delete_account/", views.delete_account, name="delete_account"),
 ]

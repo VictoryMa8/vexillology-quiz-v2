@@ -31,10 +31,28 @@
     <div class="mt-4 flex flex-col gap-2 text-xl text-center bg-base-200 p-6 rounded-lg">
         <h2 class="text-xl font-bold border-b border-base-300">Account Info</h2>
         <p>Date Joined: {{ user.date_joined|date:"M d, Y" }}</p>
+        <p>Username: {{ user.username }}</p>
         <p class="text-success font-bold">High Score: {{ user.high_score }}</p>
         <p class="text-success font-bold">Games Played: {{ user.games_played }}</p>
+        <button class="btn btn-error w-full" onclick="delete_modal.showModal()">Delete Account</button>
     </div>
 </main>
+
+<dialog id="delete_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Wait!</h3>
+        <p class="py-4">Are you absolutely sure you want to delete your account? All of your data will be permanently deleted. This action cannot be undone. 👋 😢</p>
+        <div class="modal-action">
+            <form method="dialog">
+                <button class="btn">Cancel</button>
+            </form>
+            <form method="post" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+            <button type="submit" class="btn btn-error">Yes, Delete My Account</button>
+            </form>
+        </div>
+    </div>
+</dialog>
 
 <script>
     // When DOM loads, give inputs DaisyUI classes to all form inputs
