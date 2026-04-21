@@ -2286,6 +2286,9 @@
     justify-content: flex-end;
     gap: calc(0.25rem * 2);
   }
+  .mt-0 {
+    margin-top: calc(var(--spacing) * 0);
+  }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
   }
@@ -2508,6 +2511,9 @@
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
+  .h-12 {
+    height: calc(var(--spacing) * 12);
+  }
   .h-40 {
     height: calc(var(--spacing) * 40);
   }
@@ -2537,6 +2543,9 @@
   }
   .w-90 {
     width: calc(var(--spacing) * 90);
+  }
+  .w-auto {
+    width: auto;
   }
   .w-full {
     width: 100%;
@@ -2602,9 +2611,6 @@
   .justify-center {
     justify-content: center;
   }
-  .justify-evenly {
-    justify-content: space-evenly;
-  }
   .justify-start {
     justify-content: flex-start;
   }
@@ -2661,6 +2667,9 @@
   .rounded-sm {
     border-radius: var(--radius-sm);
   }
+  .rounded-xl {
+    border-radius: var(--radius-xl);
+  }
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
@@ -2688,6 +2697,9 @@
   }
   .border-success {
     border-color: var(--color-success);
+  }
+  .border-success-content {
+    border-color: var(--color-success-content);
   }
   .bg-base-200 {
     background-color: var(--color-base-200);
@@ -2719,6 +2731,9 @@
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
+  .p-3 {
+    padding: calc(var(--spacing) * 3);
+  }
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
@@ -2731,8 +2746,14 @@
   .p-10 {
     padding: calc(var(--spacing) * 10);
   }
+  .px-2 {
+    padding-inline: calc(var(--spacing) * 2);
+  }
   .px-4 {
     padding-inline: calc(var(--spacing) * 4);
+  }
+  .py-2 {
+    padding-block: calc(var(--spacing) * 2);
   }
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
@@ -2814,9 +2835,6 @@
   }
   .text-success {
     color: var(--color-success);
-  }
-  .text-success-content {
-    color: var(--color-success-content);
   }
   .text-white {
     color: var(--color-white);
@@ -2948,6 +2966,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-success);
+      }
+    }
+  }
+  .hover\:bg-success-content {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-success-content);
       }
     }
   }
