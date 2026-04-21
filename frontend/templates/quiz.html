@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-4xl mt-8 font-bold">Are you a true Vexillologist? Let's find out!</h1>
-<!-- django.template.context_processors.auth is a default context processor, that automatically makes the user variable available in all our templates rendered using render() -->
+<!-- django.template.context_processors.auth is a default context processor, that automatically makes the user 
+variable available in all our templates rendered using render() -->
+<h1 class="text-4xl mt-8 font-bold text-center px-4">Are you a true Vexillologist? Let's find out!</h1>
 <h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: {{ user.high_score }}</h1>
 
-<div class="flex flex-col md:flex-row">
+<!-- Quiz + Collected Flags are stacked when desktop, guesses to the right -->
+<!-- Everything as column when mobile -->
+<div class="flex flex-col md:flex-row gap-4 w-full px-4 md:px-0 md:w-auto">
     <div class="flex flex-col gap-4">
-        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
+        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:h-130 md:w-150">
             {% if random_country %}
             <h1 class="text-8xl">
                 {% if random_country.flag_image_url %}
@@ -16,18 +19,18 @@
                     {{ random_country.Flag }}
                 {% endif %}
             </h1>
-            <h1 class="text-4xl mt-4 font-bold">What country is this?</h1>
+            <h1 class="text-4xl mt-4 font-bold text-center">What country/territory is this?</h1>
             {% else %}
             <h1 class="text-2xl mt-8 font-bold">Error...</h1>
             {% endif %}
 
-            <form class="flex flex-col items-center justify-center mt-4" method="post" action="{% url 'quiz' %}">
+            <form class="flex flex-col items-center justify-center mt-4 w-full" method="post" action="{% url 'quiz' %}">
                 {% csrf_token %}
                 <input 
                 id="guess"
                 type="text"
                 placeholder="Guess the country..." 
-                class="input input-success" 
+                class="input input-success w-full max-w-xs" 
                 name="guess" 
                 hx-get="{% url 'search_guesses' %}"
                 hx-trigger="keyup changed"
@@ -44,10 +47,10 @@
             <h1 class="text-3xl mt-8 font-bold">Current Streak: {{ streak }}🔥</h1>
             <h1 class="text-4xl mt-8 font-bold text-center">{{ message }}</h1>
         </div>
-        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 h-130 w-150">
+        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:h-130 md:w-150">
             <h1 class="text-4xl font-bold">Collected Flags 🚩</h1>
             {% if collections or collected_flags %}
-                <div class="flex flex-wrap items-center">
+                <div class="flex flex-wrap items-center justify-center">
                     {% for flag_url_or_emoji in collected_flags %}
                         <h1 class="text-6xl mt-4 text-center">
                             {% if flag_url_or_emoji|slice:":4" == "http" %}
@@ -62,7 +65,7 @@
         </div>
     </div>
 
-    <div id="guesses" class="flex flex-col items-center border-success border-1 rounded-2xl p-8 mx-4 w-150 mb-24 gap-6 min-h-130">
+    <div id="guesses" class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:w-150 mb-24 gap-6 md:min-h-130">
         {% include 'guesses.html' %}
     </div>
 

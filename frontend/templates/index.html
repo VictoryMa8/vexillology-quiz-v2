@@ -7,7 +7,7 @@
 <div class="hero min-h-.5 my-4">
   <div class="hero-content flex-col lg:flex-row-reverse">
     {% load static %}
-    <img class="mt-4 h-40 bg-white rounded-lg" src="{% static 'assets/images/vexillologists.png' %}">
+    <img class="mt-4 h-50 bg-white rounded-lg" src="{% static 'assets/images/vexillologists.png' %}">
     <div>
       {% if user.is_authenticated %}
       <h1 class="text-4xl md:text-6xl font-bold">Welcome to Vexillologists.com <span class="text-success">{{ user.username }}</span>!</h1>
