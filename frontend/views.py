@@ -4,13 +4,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 
+from django.db.models import F
+
 from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
 from .models import Country
-import csv
 import random
 import time
 import ast
-import os
 
 # Create your views here.
 # Users who are not logged in can only access index, signup, and login
@@ -116,27 +116,37 @@ def quiz(request):
         truth_name = truth['Country']
         truth_flag = truth.get('flag_image_url') or truth['Flag']
 
+        user = request.user
+        
+        # Creating list of updated fields (for games_played and high_score)
+        update_fields = ['games_played']
+        
+        # More on the F() function here: https://docs.djangoproject.com/en/6.0/ref/models/expressions/
+        user.games_played = F('games_played') + 1
+
         if truth_name.lower() == guess.strip().lower():
             streak += 1
             if collected_flags:
                 collected_flags.append(truth_flag)
             else:
                 collected_flags = [truth_flag]
-            
-            # Slight performance benefit with update_fields
-            user = request.user
+
             if streak > user.high_score:
                 user.high_score = streak
-                user.save(update_fields=['high_score'])
-                
-            messages.success(request, f"Correct 🥳 It was {truth_name}!")
+                update_fields.append('high_score')
+
+            # Using Django messages for success/fail messages
             message = f"Correct 🥳 It was {truth_name}!"
+            messages.success(request, message)
             print(f"User is correct! Streak is now {streak}")
-        
+
         else:
             streak = 0
             collected_flags = []
             message = f"Noooo 😢 it was {truth_name}"
+            messages.error(request, message)
+
+        user.save(update_fields=update_fields)
 
         random_country = random.choice(countries) if countries else None
 

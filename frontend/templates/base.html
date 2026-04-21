@@ -25,13 +25,20 @@
 
 <!-- Notification pop-ups with Django messages -->
 {% if messages %}
-<div id="toast-container" class="toast toast-top toast-end z-0">
+<div id="toast-container" class="toast toast-middle toast-center z-50">
     {% for message in messages %}
-    <div role="alert" class="alert alert-success shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+    <!-- Using Django messages for success/fail messages -->
+    <div role="alert" class="alert alert-{{ message.tags }} shadow-2xl min-w-96 text-xl px-8 py-4 gap-4">
+        {% if message.tags == "success" %}
+        <!-- Icons change depending on success/fail -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <!-- Message content filled in here -->
+        {% else %}
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {% endif %}
         <span>{{ message }}</span>
     </div>
     {% endfor %}
