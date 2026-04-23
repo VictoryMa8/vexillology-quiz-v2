@@ -6,77 +6,92 @@ variable available in all our templates rendered using render() -->
 <h1 class="text-4xl mt-8 font-bold text-center px-4">Are you a true Vexillologist? Let's find out!</h1>
 <h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: {{ user.high_score }}</h1>
 
-<!-- Quiz + Collected Flags are stacked when desktop, guesses to the right -->
-<!-- Everything as column when mobile -->
-<div class="flex flex-col md:flex-row gap-4 w-full px-4 md:px-0 md:w-auto">
-    <div class="flex flex-col gap-4">
-        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:w-150">
-            {% if random_country %}
-            <h1 class="text-8xl">
-                {% if random_country.flag_image_url %}
-                    <img src="{{ random_country.flag_image_url }}" class="h-[1em] object-contain drop-shadow-md inline-block rounded-md" alt="Flag">
-                {% else %}
-                    {{ random_country.Flag }}
-                {% endif %}
-            </h1>
-            <h1 class="text-4xl mt-4 font-bold text-center">What country/territory is this?</h1>
+<div class="flex flex-col gap-4 w-full px-4 md:px-0 md:w-150 mb-24">
+    <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8">
+        {% if random_country %}
+        <h1 class="text-8xl">
+            {% if random_country.flag_image_url %}
+                <img src="{{ random_country.flag_image_url }}" class="h-[1em] object-contain drop-shadow-md inline-block rounded-md" alt="Flag">
             {% else %}
-            <h1 class="text-2xl mt-8 font-bold">Error...</h1>
+                {{ random_country.Flag }}
             {% endif %}
+        </h1>
+        <h1 class="text-4xl mt-4 font-bold text-center">What country/territory is this?</h1>
+        {% else %}
+        <h1 class="text-2xl mt-8 font-bold">Error...</h1>
+        {% endif %}
 
-            <form class="flex flex-col items-center justify-center mt-4 w-full" method="post" action="{% url 'quiz' %}">
-                {% csrf_token %}
-                <input 
+        <form class="flex flex-col items-center justify-center mt-4 w-full" method="post" action="{% url 'quiz' %}">
+            {% csrf_token %}
+            <!-- Relative wrapper so the dropdown can be absolutely positioned below the input -->
+            <div class="relative w-full max-w-xs">
+                <input
                 id="guess"
                 type="text"
-                placeholder="Guess the country..." 
-                class="input input-success w-full max-w-xs" 
-                name="guess" 
+                placeholder="Guess the country..."
+                class="input input-success w-full text-xl text-center"
+                name="guess"
+                autocomplete="off"
                 hx-get="{% url 'search_guesses' %}"
                 hx-trigger="keyup changed"
                 hx-target="#guesses"
-                hx-on::before-request="document.getElementById('guesses').style.opacity = 0.3;"
-                hx-on::after-request="document.getElementById('guesses').style.opacity = 1;"
+                hx-on::before-request="document.getElementById('guesses').classList.add('opacity-50');"
+                hx-on::after-request="document.getElementById('guesses').classList.remove('opacity-50');"
                 />
-                <input class="hidden" value="{{ random_country }}" name="truth" />
-                <input class="hidden" value="{{ streak }}" name="streak" />
-                <input class="hidden" value="{{ collected_flags }}" name="collected_flags">
-                <button type="submit" class="btn btn-success mt-4 text-2xl">Guess</button>
-            </form>
-
-            <h1 class="text-2xl mt-4 font-bold">Current Streak: {{ streak }}🔥</h1>
-        </div>
-        <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:h-130 md:w-150">
-            <h1 class="text-2xl font-bold">Collected Flags 🚩</h1>
-            {% if collections or collected_flags %}
-                <div class="flex flex-wrap items-center justify-center">
-                    {% for flag_url_or_emoji in collected_flags %}
-                        <h1 class="text-6xl mt-4 text-center">
-                            {% if flag_url_or_emoji|slice:":4" == "http" %}
-                                <img src="{{ flag_url_or_emoji }}" class="h-[1em] mx-1 inline-block drop-shadow-sm rounded-sm" alt="Flag">
-                            {% else %}
-                                {{ flag_url_or_emoji }}
-                            {% endif %}
-                        </h1>
-                    {% endfor %}
+                <!-- Dropdown anchored directly below the input -->
+                <div id="guesses" class="absolute top-full left-0 right-0 z-50 mt-1 transition-opacity duration-150">
+                    {% include 'guesses.html' %}
                 </div>
-            {% endif %}
-        </div>
+            </div>
+            <input class="hidden" value="{{ random_country }}" name="truth" />
+            <input class="hidden" value="{{ streak }}" name="streak" />
+            <input class="hidden" value="{{ collected_flags }}" name="collected_flags">
+            <button type="submit" class="btn btn-success mt-4 text-2xl">Guess</button>
+        </form>
+
+        <h1 class="text-2xl mt-4 font-bold">Current Streak: {{ streak }}🔥</h1>
     </div>
 
-    <div id="guesses" class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:w-150 mb-24 gap-6 md:min-h-130">
-        {% include 'guesses.html' %}
+    <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:h-130 overflow-y-auto">
+        <h1 class="text-2xl font-bold shrink-0">Collected Flags 🚩</h1>
+        {% if collections or collected_flags %}
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-2">
+                {% for flag_url_or_emoji in collected_flags %}
+                    {% if flag_url_or_emoji|slice:":4" == "http" %}
+                        <img src="{{ flag_url_or_emoji }}" class="h-10 w-auto inline-block drop-shadow-sm rounded-sm" alt="Flag">
+                    {% else %}
+                        <span class="text-4xl leading-none">{{ flag_url_or_emoji }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
-
-    <script>
-        const input = document.getElementById('guess');
-            
-        function sendText(text) {
-            input.value = text
-            input.classList.add('bg-success')
-            input.focus()
-        }
-    </script>
 </div>
+
+<script>
+    const input = document.getElementById('guess');
+    const guessesDropdown = document.getElementById('guesses');
+
+    function sendText(text) {
+        input.value = text;
+        input.classList.add('bg-success');
+        guessesDropdown.innerHTML = '';
+        input.focus();
+    }
+
+    // Close dropdown when clicking outside the input or dropdown
+    document.addEventListener('click', function (e) {
+        if (!guessesDropdown.contains(e.target) && e.target !== input) {
+            guessesDropdown.innerHTML = '';
+        }
+    });
+
+    // Close dropdown on Escape
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            guessesDropdown.innerHTML = '';
+        }
+    });
+</script>
 
 {% endblock %}
