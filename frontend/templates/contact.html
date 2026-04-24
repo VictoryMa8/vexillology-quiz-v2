@@ -2,5 +2,12 @@
 
 {% block content %}
 <h1 class="text-4xl md:text-6xl mt-8 font-bold">Contact</h1>
-<h2 class="text-2xl md:text-4xl mt-8 break-words text-center">Email <span onclick="copyEmail()" id="email" class="text-success">victoryma23@gmail.com</span> for questions and support</h2>
+<h2 class="text-2xl md:text-4xl mt-8 break-words text-center">Email <span onclick="copyEmail()" id="email" class="text-success hover:text-success-content hover:pointer transition duration-300 ease-in-out">victoryma23@gmail.com</span> for questions and support</h2>
+<h2 class="text-2xl md:text-4xl mt-2 break-words text-center">Visit my <a href="https://www.linkedin.com/in/victory-ma-724942256/" target="_blank" class="text-success hover:text-success-content hover:pointer transition duration-300 ease-in-out">LinkedIn</a> as well!</h2>
+<script>
+    function copyEmail() {
+        navigator.clipboard.writeText('victoryma23@gmail.com');
+        toast.show('Email copied to clipboard');
+    }
+</script>
 {% endblock %}

@@ -5,13 +5,21 @@
 {% if chosen_country.flag_image_url %}
     <img src="{{ chosen_country.flag_image_url }}" class="w-90 inline-block drop-shadow-md rounded-sm" alt="Flag">
 {% else %}
-    {{ chosen_country.Flag }}
+    <span class="text-9xl">{{ chosen_country.Flag }}</span>
 {% endif %}
+
+{% if chosen_country.Fact %}
+<div class="flex items-start gap-2 bg-success-content border border-success text-white mx-4 mt-6 px-6 py-4 rounded-2xl max-w-2xl">
+    <span class="text-2xl shrink-0">💡</span>
+    <p class="text-lg leading-relaxed">{{ chosen_country.Fact }}</p>
+</div>
+{% endif %}
+
 <div class="flex flex-col bg-success-content text-white p-8 my-4 mx-4 rounded-2xl">
-    <h2 class="text-2xl md:text-4xl">Capital: {{ chosen_country.Capital }}</h2>
+    <h2 class="text-2xl md:text-4xl">Type: {{ chosen_country.Type }}</h2>
+    <h2 class="text-2xl md:text-4xl mt-4">Capital: {{ chosen_country.Capital }}</h2>
     <h2 class="text-2xl md:text-4xl mt-4">Population: {{ chosen_country.Population_2024 }} (2024)</h2>
-    <h2 class="text-2xl md:text-4xl mt-4">GDP: {{ chosen_country.GDP_USD_Billions }} (USD, in Billions)</h2>
-    <h2 class="text-2xl md:text-4xl mt-4">Area: {{ chosen_country.Area_km2 }} (Square Kilometers)</h2>
+    <h2 class="text-2xl md:text-4xl mt-4">Area: {{ chosen_country.Area_km2 }} km²</h2>
     <h2 class="text-2xl md:text-4xl mt-4">Official Language: {{ chosen_country.Official_Language }}</h2>
     <h2 class="text-2xl md:text-4xl mt-4">Region: {{ chosen_country.Region }}</h2>
 </div>

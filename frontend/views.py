@@ -24,10 +24,11 @@ def get_countries():
             'flag_image_url': c.flag_image_url,
             'Capital': c.capital,
             'Population_2024': c.population,
-            'GDP_USD_Billions': float(c.gdp_usd_billions) if c.gdp_usd_billions is not None else None,
             'Area_km2': c.area_km2,
             'Official_Language': c.official_language,
             'Region': c.region,
+            'Type': c.entry_type,
+            'Fact': c.fact,
         }
         for c in Country.objects.all().order_by('name')
     ]
@@ -124,6 +125,10 @@ def quiz(request):
         # More on the F() function here: https://docs.djangoproject.com/en/6.0/ref/models/expressions/
         user.games_played = F('games_played') + 1
 
+        game_over = False
+        final_streak = 0
+        final_collected_flags = []
+
         if truth_name.lower() == guess.strip().lower():
             streak += 1
             if collected_flags:
@@ -141,6 +146,9 @@ def quiz(request):
             print(f"User is correct! Streak is now {streak}")
 
         else:
+            game_over = True
+            final_streak = streak
+            final_collected_flags = collected_flags[:] # Shallow copy of the collected flags list
             streak = 0
             collected_flags = []
             message = f"Noooo 😢 it was {truth_name}"
@@ -150,7 +158,7 @@ def quiz(request):
 
         random_country = random.choice(countries) if countries else None
 
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags, 'game_over': game_over, 'final_streak': final_streak, 'final_collected_flags': final_collected_flags })
     
     else:
         streak = 0

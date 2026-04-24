@@ -4,7 +4,7 @@
 <!-- django.template.context_processors.auth is a default context processor, that automatically makes the user 
 variable available in all our templates rendered using render() -->
 <h1 class="text-4xl mt-8 font-bold text-center px-4">Are you a true Vexillologist? Let's find out!</h1>
-<h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: {{ user.high_score }}</h1>
+<h1 class="text-3xl mt-4 mb-8">Your All-time Highscore: {{ user.high_score }} ⭐️</h1>
 
 <div class="flex flex-col gap-4 w-full px-4 md:px-0 md:w-150 mb-24">
     <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8">
@@ -16,7 +16,7 @@ variable available in all our templates rendered using render() -->
                 {{ random_country.Flag }}
             {% endif %}
         </h1>
-        <h1 class="text-4xl mt-4 font-bold text-center">What country/territory is this?</h1>
+        <h1 class="text-4xl mt-4 font-bold text-center">What country or territory is this?</h1>
         {% else %}
         <h1 class="text-2xl mt-8 font-bold">Error...</h1>
         {% endif %}
@@ -67,6 +67,57 @@ variable available in all our templates rendered using render() -->
         {% endif %}
     </div>
 </div>
+
+<!-- Game over modal -->
+{% if game_over %}
+<dialog id="game_over_modal" class="modal">
+    <div class="modal-box flex flex-col items-center gap-4">
+        <h3 class="text-2xl font-bold text-center">Game Over 😢</h3>
+        <div class="divider my-0"></div>
+
+        <div class="flex flex-col sm:flex-row gap-6 items-center justify-center w-full">
+            <div class="flex flex-col items-center">
+                <span class="text-4xl font-bold text-warning">{{ final_streak }}</span>
+                <span class="text-sm text-base-content mt-1">Final Streak 🔥</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="text-4xl font-bold text-success">{{ user.high_score }}</span>
+                <span class="text-sm text-base-content mt-1">High Score ⭐</span>
+            </div>
+        </div>
+
+        <div class="w-full">
+            <h4 class="text-xl font-semibold text-center mb-2">Collected Flags 🚩</h4>
+            {% if final_collected_flags %}
+                <div class="flex flex-wrap items-center justify-center gap-2 max-h-40 overflow-y-auto p-1">
+                    {% for flag_url_or_emoji in final_collected_flags %}
+                        <!-- If the flag is a URL, display it as an image -->
+                        {% if flag_url_or_emoji|slice:":4" == "http" %}
+                            <img src="{{ flag_url_or_emoji }}" class="h-10 w-auto inline-block drop-shadow-sm rounded-sm" alt="Flag">
+                        {% else %} <!-- If the flag is an emoji, display it as text -->
+                            <span class="text-4xl leading-none">{{ flag_url_or_emoji }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center text-base-content text-sm">No flags collected this round.</p>
+            {% endif %}
+        </div>
+
+        <div class="modal-action w-full justify-center mt-0">
+            <form method="dialog">
+                <button class="btn btn-success px-8">Play Again</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>Close</button>
+    </form>
+</dialog>
+<script>
+    document.getElementById('game_over_modal').showModal();
+</script>
+{% endif %}
 
 <script>
     const input = document.getElementById('guess');
