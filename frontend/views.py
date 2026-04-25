@@ -254,6 +254,9 @@ def privacy(request):
 def contact(request):
     return render(request, 'contact.html')
 
+def release_notes(request):
+    return render(request, 'release_notes.html')
+
 @login_required
 def settings(request):
     if request.method == 'POST':

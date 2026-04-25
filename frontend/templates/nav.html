@@ -61,6 +61,7 @@
         <li><a href="{% url 'about' %}" class="text-2xl border-b-1 border-success-content">About</a></li>
         <li><a href="{% url 'contact' %}" class="text-2xl border-b-1 border-success-content">Contact</a></li>
         <li><a href="{% url 'privacy' %}" class="text-2xl border-b-1 border-success-content">Privacy Policy</a></li>
+        <li><a href="{% url 'release_notes' %}" class="text-2xl border-b-1 border-success-content">Release Notes</a></li>
 
         <!-- If user is authenticated, display settings + logout, otherwise, login + sign up -->
         {% if user.is_authenticated %}
