@@ -7,7 +7,7 @@ from django.contrib.auth import login as auth_login
 from django.db.models import F
 
 from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
-from .models import Country
+from .models import Country, Vexillologist
 import random
 import time
 import ast
@@ -158,15 +158,22 @@ def quiz(request):
 
         random_country = random.choice(countries) if countries else None
 
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags, 'game_over': game_over, 'final_streak': final_streak, 'final_collected_flags': final_collected_flags })
+        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags, 'game_over': game_over, 'final_streak': final_streak, 'final_collected_flags': final_collected_flags, 'truth_name': truth_name })
     
     else:
         streak = 0
         random_country = random.choice(countries) if countries else None
         return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
     
+def leaderboard(request):
+    top_players = Vexillologist.objects.order_by('-high_score')[:10]
+    return render(request, 'leaderboard.html', {'top_players': top_players, 'current_user': request.user})
+
 def about(request):
     return render(request, 'about.html')
+
+def privacy(request):
+    return render(request, 'privacy.html')
 
 def contact(request):
     return render(request, 'contact.html')

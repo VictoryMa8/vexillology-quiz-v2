@@ -72,16 +72,16 @@ variable available in all our templates rendered using render() -->
 {% if game_over %}
 <dialog id="game_over_modal" class="modal">
     <div class="modal-box flex flex-col items-center gap-4">
-        <h3 class="text-2xl font-bold text-center">Game Over 😢</h3>
+        <h3 class="text-2xl font-bold text-center">Game Over 😢 It was <span class="text-error">{{ truth_name }} 🚩</span></h3>
         <div class="divider my-0"></div>
 
         <div class="flex flex-col sm:flex-row gap-6 items-center justify-center w-full">
             <div class="flex flex-col items-center">
-                <span class="text-4xl font-bold text-warning">{{ final_streak }}</span>
+                <span class="text-4xl font-bold text-warning mt-0">{{ final_streak }}</span>
                 <span class="text-sm text-base-content mt-1">Final Streak 🔥</span>
             </div>
             <div class="flex flex-col items-center">
-                <span class="text-4xl font-bold text-success">{{ user.high_score }}</span>
+                <span class="text-4xl font-bold text-success mt-0">{{ user.high_score }}</span>
                 <span class="text-sm text-base-content mt-1">High Score ⭐</span>
             </div>
         </div>
