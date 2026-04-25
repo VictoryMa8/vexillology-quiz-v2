@@ -5,11 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from django.db.models import F
 from django.core.cache import cache
+# Named django_settings to avoid conflict with settings.py (my view)
+from django.conf import settings as django_settings
 
 from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
 from .models import Country, Vexillologist
 import random
 import time
+import requests
 
 # Create your views here.
 # Users who are not logged in can only access index, signup, and login
@@ -39,16 +42,35 @@ def index(request):
 def signup(request):
     # On the sign up page, get the form with post
     if request.method == 'POST':
+        token = request.POST.get('g-recaptcha-response', '')
+        # Verify with Google
+        # Use requests library to send a POST request to the Google Recaptcha API
+        resp = requests.post('https://www.google.com/recaptcha/api/siteverify', data={
+            'secret': django_settings.RECAPTCHA_SECRET_KEY,
+            'response': token,
+        })
+        # If the CAPTCHA is not successful, show an error message and render the signup page again
+        if not resp.json().get('success'):
+            messages.error(request, 'Please complete the CAPTCHA.')
+            return render(request, 'signup.html', {
+                'form': VexillologistCreationForm(),
+                'recaptcha_site_key': django_settings.RECAPTCHA_SITE_KEY,
+            })
+
+        # If the CAPTCHA is successful, process the form
         form = VexillologistCreationForm(request.POST)
+        # If the form is valid, save the user and login the user
         if form.is_valid():
-            # Put user info into database, login user, and redirect to index
             user = form.save()
-            # Need to tell Django whether its using ModelBackend or AuthenticationBackend (OAuth)
             auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('index')
     else:
         form = VexillologistCreationForm()
-    return render(request, 'signup.html', {'form': form})
+
+    return render(request, 'signup.html', {
+        'form': form,
+        'recaptcha_site_key': django_settings.RECAPTCHA_SITE_KEY,
+    })
 
 def login_view(request):
     if request.method == 'POST':

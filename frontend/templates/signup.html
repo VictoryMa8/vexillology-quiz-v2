@@ -25,7 +25,9 @@
                 {% endfor %}
             </label>
         {% endfor %}
+        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
         <button type="submit" class="btn btn-primary mt-4 w-full">Sign Up</button>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </form>
     <p>Already have an account? <a href="{% url 'login' %}" class="link link-primary hover:text-primary-focus transition-colors">Log in</a></p>
 </main>

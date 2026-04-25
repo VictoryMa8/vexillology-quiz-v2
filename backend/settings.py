@@ -194,3 +194,7 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# Recaptcha configurations
+RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY')
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
