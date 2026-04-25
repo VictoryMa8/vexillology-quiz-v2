@@ -8,6 +8,8 @@ from django.core.cache import cache
 # Named django_settings to avoid conflict with settings.py (my view)
 from django.conf import settings as django_settings
 
+from allauth.account.models import EmailAddress
+
 from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
 from .models import Country, Vexillologist
 import random
@@ -63,6 +65,14 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            # EmailAddress is from allauth.account.models for storing email addresses for users
+            # create() creates a new email address record in the database
+            email_address = EmailAddress.objects.create(
+                user=user, email=user.email, primary=True, verified=False
+            )
+            # send_confirmation() generates the confirmation token and fires the email
+            # signup=True tells allauth to use the signup-specific email template
+            email_address.send_confirmation(request, signup=True)
             return redirect('index')
     else:
         form = VexillologistCreationForm()
@@ -257,7 +267,35 @@ def settings(request):
             return redirect('settings')
     else:
         form = VexillologistChangeForm(instance=request.user)
-    return render(request, 'settings.html', {'form': form})
+
+    email_record = EmailAddress.objects.filter(user=request.user, primary=True).first()
+    email_verified = email_record.verified if email_record else False
+    return render(request, 'settings.html', {'form': form, 'email_verified': email_verified})
+
+
+@login_required
+def resend_confirmation(request):
+    # If the user clicks the "Resend Confirmation Email" button, this view is called
+    if request.method == 'POST':
+        '''
+        get_or_create() creates a new email address record in the database if it doesn't exist
+        
+        get_or_create always returns a 2-tuple (instance, created_bool)
+        
+        The object we want and a boolean for whether it was just created. Without unpacking it, email_record was holding the whole tuple, hence the error. 
+        
+        The , _ discards the boolean since we don't need it.
+        '''
+        email_record, _ = EmailAddress.objects.get_or_create(
+            user=request.user,
+            defaults={'email': request.user.email, 'primary': True, 'verified': False},
+        )
+        if email_record.verified:
+            messages.info(request, 'Your email is already confirmed.')
+        else:
+            email_record.send_confirmation(request)
+            messages.success(request, 'Confirmation email sent! Check your inbox.')
+    return redirect('settings')
 
 @login_required
 def delete_account(request):

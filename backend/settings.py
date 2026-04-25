@@ -174,7 +174,16 @@ AUTHENTICATION_BACKENDS = [
 # Ensuring it respects our custom email change
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'optional' # optional means the user will be able to login without verifying their email
+
+# Email backend: Resend (the company) SMTP relay
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'resend'
+EMAIL_HOST_PASSWORD = os.getenv('RESEND_API_KEY')
+DEFAULT_FROM_EMAIL = 'Vexillologists <noreply@vexillologists.com>' # This is the email address that will be used to send emails from the app
 
 # Google OAuth2 configurations
 SOCIALACCOUNT_PROVIDERS = {

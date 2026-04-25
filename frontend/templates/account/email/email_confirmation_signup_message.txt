@@ -1,0 +1,10 @@
+Hi {{ user.username }},
+
+Welcome to Vexillologists! Please confirm your email address by visiting the link below.
+
+{{ activate_url }}
+
+This link expires in 3 days. If you didn't create an account, you can ignore this email — unconfirmed accounts are automatically deleted after 7 days.
+
+— The Vexillologists Team
+vexillologists.com

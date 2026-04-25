@@ -19,4 +19,5 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("settings/", views.settings, name="settings"),
     path("settings/delete_account/", views.delete_account, name="delete_account"),
+    path("settings/resend_confirmation/", views.resend_confirmation, name="resend_confirmation"),
 ]
