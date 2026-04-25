@@ -3,14 +3,13 @@ from django.utils.text import slugify
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
-
 from django.db.models import F
+from django.core.cache import cache
 
 from .forms import LoginForm, VexillologistCreationForm, VexillologistChangeForm
 from .models import Country, Vexillologist
 import random
 import time
-import ast
 
 # Create your views here.
 # Users who are not logged in can only access index, signup, and login
@@ -53,10 +52,27 @@ def signup(request):
 
 def login_view(request):
     if request.method == 'POST':
+        # request.META contains all the metadata of the HTTP request (the HTTP headers) that is coming to our Django server, it can contain the user agent, ip address, content type, and so on.
+        
+        # REMOTE_ADDR is the key for the connecting IP address, we use it to identify who is making the request
+        # Otherwise unknown
+        ip = request.META.get('REMOTE_ADDR', 'unknown')
+        cache_key = f'login_attempts_{ip}'
+        attempts = cache.get(cache_key, 0)
+
+        if attempts >= 5:
+            messages.error(request, 'Too many login attempts. Please wait a minute and try again.')
+            return render(request, 'login.html', {'form': LoginForm()})
+
         form = LoginForm(request.POST)
+        # If the form is valid, delete the cache key and login the user
         if form.is_valid():
+            cache.delete(cache_key)
             auth_login(request, form.user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('index')
+        else:
+            # Set the cache key to the number of attempts + 1, and the timeout to 60 seconds
+            cache.set(cache_key, attempts + 1, 60)
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
@@ -100,70 +116,98 @@ def country(request, country_name):
 def quiz(request):
     countries = get_countries()
     message = ""
+
+    """
+    Reworked to use session data instead of hidden form fields
+    Hidden form fields are vulnerable to CSRF attacks, session data is not
+    
+    request.session is a dictionary-like object. We set keys on it just like a regular dict. Django automatically saves it and associates it with this user's session ID
+    """
     if request.method == "GET":
         random_country = random.choice(countries) if countries else None
-        print(f"New random country: {random_country['Country'] if random_country else 'None'}")
-        streak = 0
-        collected_flags = []
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'collected_flags': collected_flags })
+        request.session['quiz_country'] = random_country
+        request.session['quiz_streak'] = 0
+        request.session['quiz_collected_flags'] = []
+        return render(request, 'quiz.html', context={
+            'countries': countries,
+            'random_country': random_country,
+            'streak': 0,
+            'collected_flags': [],
+        })
 
     elif request.method == "POST":
-        # ast.literal_eval() allows us to turn the string into a dictionary (of the country)
-        truth = ast.literal_eval(request.POST.get('truth'))
-        collected_flags = ast.literal_eval(request.POST.get('collected_flags'))
-        guess = request.POST.get('guess')
-        streak = int(request.POST.get('streak'))
+        """
+        # Read game state from the server-side session, not from POST data
+        # request.session.get(key, default) reads the value back from the server-side session
+        """
+        truth = request.session.get('quiz_country')
+        streak = request.session.get('quiz_streak', 0)
+        collected_flags = request.session.get('quiz_collected_flags', [])
 
+        if not truth:
+            return redirect('quiz')
+
+        guess = request.POST.get('guess', '').strip()
         truth_name = truth['Country']
         truth_flag = truth.get('flag_image_url') or truth['Flag']
 
         user = request.user
-        
-        # Creating list of updated fields (for games_played and high_score)
         update_fields = ['games_played']
-        
-        # More on the F() function here: https://docs.djangoproject.com/en/6.0/ref/models/expressions/
         user.games_played = F('games_played') + 1
 
         game_over = False
         final_streak = 0
         final_collected_flags = []
 
-        if truth_name.lower() == guess.strip().lower():
+        if truth_name.lower() == guess.lower():
             streak += 1
-            if collected_flags:
-                collected_flags.append(truth_flag)
-            else:
-                collected_flags = [truth_flag]
+            collected_flags = collected_flags + [truth_flag]
 
             if streak > user.high_score:
                 user.high_score = streak
                 update_fields.append('high_score')
 
-            # Using Django messages for success/fail messages
             message = f"Correct 🥳 It was {truth_name}!"
             messages.success(request, message)
-            print(f"User is correct! Streak is now {streak}")
 
         else:
             game_over = True
             final_streak = streak
-            final_collected_flags = collected_flags[:] # Shallow copy of the collected flags list
+            final_collected_flags = collected_flags[:]
             streak = 0
             collected_flags = []
             message = f"Noooo 😢 it was {truth_name}"
             messages.error(request, message)
 
+        # Update the user's database record
         user.save(update_fields=update_fields)
 
+        # After processing the guess, update the session
         random_country = random.choice(countries) if countries else None
+        request.session['quiz_country'] = random_country
+        request.session['quiz_streak'] = streak
+        request.session['quiz_collected_flags'] = collected_flags
 
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message, 'collected_flags': collected_flags, 'game_over': game_over, 'final_streak': final_streak, 'final_collected_flags': final_collected_flags, 'truth_name': truth_name })
-    
+        return render(request, 'quiz.html', context={
+            'countries': countries,
+            'random_country': random_country,
+            'streak': streak,
+            'message': message,
+            'collected_flags': collected_flags,
+            'game_over': game_over,
+            'final_streak': final_streak,
+            'final_collected_flags': final_collected_flags,
+            'truth_name': truth_name,
+        })
+
     else:
-        streak = 0
         random_country = random.choice(countries) if countries else None
-        return render(request, 'quiz.html', context={'countries': countries, 'random_country': random_country, 'streak': streak, 'message': message })
+        return render(request, 'quiz.html', context={
+            'countries': countries,
+            'random_country': random_country,
+            'streak': 0,
+            'message': message,
+        })
     
 def leaderboard(request):
     top_players = Vexillologist.objects.order_by('-high_score')[:10]

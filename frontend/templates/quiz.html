@@ -43,9 +43,6 @@ variable available in all our templates rendered using render() -->
                     {% include 'guesses.html' %}
                 </div>
             </div>
-            <input class="hidden" value="{{ random_country }}" name="truth" />
-            <input class="hidden" value="{{ streak }}" name="streak" />
-            <input class="hidden" value="{{ collected_flags }}" name="collected_flags">
             <button type="submit" class="btn btn-success mt-4 text-2xl">Guess</button>
         </form>
 
