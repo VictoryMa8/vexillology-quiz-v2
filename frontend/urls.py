@@ -14,6 +14,7 @@ urlpatterns = [
     path("country/<slug:country_name>/", views.country, name="country"),
     path("quiz/", views.quiz, name="quiz"),
     path("leaderboard/", views.leaderboard, name="leaderboard"),
+    path("mastery/", views.mastery, name="mastery"),
     path("about/", views.about, name="about"),
     path("privacy/", views.privacy, name="privacy"),
     path("contact/", views.contact, name="contact"),

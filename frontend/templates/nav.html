@@ -19,14 +19,19 @@
     </label>
 
     <!-- Leaderboard: desktop only -->
-    <a href="{% url 'leaderboard' %}" class="hidden md:flex btn btn-ghost text-xl">Leaderboard</a>
+    <a href="{% url 'leaderboard' %}" class="hidden md:flex btn btn-warning text-xl rounded-xl">Leaderboard</a>
+
+    <!-- Mastery: desktop only -->
+    {% if user.is_authenticated %}
+    <a href="{% url 'mastery' %}" class="hidden md:flex btn btn-primary text-xl rounded-xl">Mastery</a>
+    {% endif %}
 
     <!-- Quiz button: desktop only (in dropdown on mobile) -->
     <a href="{% url 'quiz' %}" class="hidden md:flex btn btn-success text-xl rounded-xl px-4">Quiz!</a>
 
     <!-- Login: desktop only, shown when not authenticated -->
     {% if not user.is_authenticated %}
-    <a href="{% url 'login' %}" class="hidden md:flex btn btn-outline btn-success text-xl">Login</a>
+    <a href="{% url 'login' %}" class="hidden md:flex btn btn-outline btn-success rounded-xl text-xl">Login</a>
     {% endif %}
 
     <!-- Dropdown menu -->
@@ -57,6 +62,11 @@
 
         <!-- Leaderboard: mobile only (already shown in desktop navbar) -->
         <li class="md:hidden"><a href="{% url 'leaderboard' %}" class="text-2xl border-b-1 border-success-content">Leaderboard</a></li>
+
+        <!-- Mastery: mobile only -->
+        {% if user.is_authenticated %}
+        <li class="md:hidden"><a href="{% url 'mastery' %}" class="text-2xl border-b-1 border-success-content">Mastery</a></li>
+        {% endif %}
 
         <li><a href="{% url 'about' %}" class="text-2xl border-b-1 border-success-content">About</a></li>
         <li><a href="{% url 'contact' %}" class="text-2xl border-b-1 border-success-content">Contact</a></li>

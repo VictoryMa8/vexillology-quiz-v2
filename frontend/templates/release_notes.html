@@ -1,13 +1,72 @@
 {% extends 'base.html' %}
 
-{% block title %} Release Notes {% endblock %}
-
 {% block content %}
-<h1 class="text-4xl md:text-6xl mt-8 font-bold">Release Notes</h1>
-<div class="flex flex-col items-center justify-center mt-16 mb-8 gap-4">
-    {% load static %}
-    <img class="h-60 rounded-lg opacity-50" src="{% static 'assets/images/globe.svg' %}">
-    <h2 class="text-2xl md:text-4xl text-center mx-4 mt-6">Coming soon! 🚀</h2>
-    <p class="text-xl md:text-2xl text-center mx-4 text-base-content/60">Check back later for a full history of updates and improvements.</p>
+<h1 class="text-4xl md:text-6xl mt-8 font-bold text-center px-4">Release Notes 📝</h1>
+
+<div class="flex flex-col w-full px-4 md:px-0 md:w-160 mt-10 mb-24 gap-8">
+
+    <!-- 1.0.4 -->
+    <div class="border border-success rounded-2xl p-6 flex flex-col gap-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+            <h2 class="text-2xl font-bold">v1.0.4</h2>
+            <span class="badge badge-success text-sm px-3 py-1">Latest</span>
+        </div>
+        <ul class="flex flex-col gap-2 text-base-content/80 list-disc list-inside text-lg">
+            <li>Mastery page - see every flag alphabetically; flags you've collected are unlocked</li>
+            <li>No repeated flags (you won't see the same flag twice in a game)</li>
+            <li>Performance - the country list is now cached in memory, less database queries</li>
+            <li>Bug fix: refreshing after a wrong guess no longer resubmits the form and double-counts your game</li>
+        </ul>
+    </div>
+
+    <!-- 1.0.3 -->
+    <div class="border border-base-300 rounded-2xl p-6 flex flex-col gap-3">
+        <h2 class="text-2xl font-bold">v1.0.3</h2>
+        <ul class="flex flex-col gap-2 text-base-content/80 list-disc list-inside text-lg">
+            <li>Email confirmation - new accounts receive a verification email</li>
+            <li>reCAPTCHA v2 (sign-up form is protected against bots)</li>
+            <li>Nav redesigned, cleaner navbar with mobile dropdown</li>
+            <li>Release notes page added - this page!</li>
+        </ul>
+    </div>
+
+    <!-- 1.0.2 -->
+    <div class="border border-base-300 rounded-2xl p-6 flex flex-col gap-3">
+        <h2 class="text-2xl font-bold">v1.0.2</h2>
+        <ul class="flex flex-col gap-2 text-base-content/80 list-disc list-inside text-lg">
+            <li>Security (quiz state moved to server-side sessions)</li>
+            <li>Leaderboard (top 10 players ranked by high score)</li>
+            <li>Privacy policy (added full privacy policy page)</li>
+            <li>Fun facts - each country now has an interesting fact on its detail page.</li>
+            <li>Autocomplete dropdown (guess suggestions as you type)</li>
+            <li>Bigger and cleaner success and error notifications</li>
+        </ul>
+    </div>
+
+    <!-- 1.0.1 -->
+    <div class="border border-base-300 rounded-2xl p-6 flex flex-col gap-3">
+        <h2 class="text-2xl font-bold">v1.0.1</h2>
+        <ul class="flex flex-col gap-2 text-base-content/80 list-disc list-inside text-lg">
+            <li>Google OAuth added (sign in with your Google account)</li>
+            <li>Flag images (switched from emoji to Wikimedia flag images)</li>
+            <li>Responsive layout (quiz and all pages work on mobile)</li>
+            <li>Footer (links and site info added)</li>
+            <li>Donation button (support the site!)</li>
+        </ul>
+    </div>
+
+    <!-- 1.0.0 -->
+    <div class="border border-base-300 rounded-2xl p-6 flex flex-col gap-3">
+        <h2 class="text-2xl font-bold">v1.0.0</h2>
+        <p class="text-base-content/60 text-lg italic">Initial launch</p>
+        <ul class="flex flex-col gap-2 text-base-content/80 list-disc list-inside text-lg">
+            <li>Flag guessing quiz with streak tracking</li>
+            <li>Account system with email login, high score, and settings</li>
+            <li>Country detail pages with capital, population, etc.</li>
+            <li>Country search on the home page</li>
+            <li>Dark / light theme toggle</li>
+        </ul>
+    </div>
+
 </div>
 {% endblock %}

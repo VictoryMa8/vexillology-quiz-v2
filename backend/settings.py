@@ -204,6 +204,14 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+'''
+OAuth cross-site redirect: passkey flows (and some browsers) don't send the session
+cookie back on the OAuth callback if SameSite=Lax, causing allauth's state check to
+fail. In production (HTTPS), use SameSite=None so the cookie is always included.
+'''
+SESSION_COOKIE_SAMESITE = 'Lax' if DEBUG else 'None'
+SESSION_COOKIE_SECURE = not DEBUG
+
 # Recaptcha configurations
 RECAPTCHA_SITE_KEY = os.getenv('RECAPTCHA_SITE_KEY')
 RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')

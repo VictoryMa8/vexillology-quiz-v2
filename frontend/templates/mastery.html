@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col items-center w-full px-4 md:px-0 md:w-200 mb-24 mt-8 gap-6">
+
+    <div class="flex flex-col items-center gap-2">
+        <h1 class="text-4xl font-bold">Flag Mastery 🎖️</h1>
+        <p class="text-base-content/60 text-lg">Collect flags by guessing them correctly!</p>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="w-full max-w-md flex flex-col gap-2">
+        <div class="flex justify-between text-sm text-base-content/70">
+            <span>{{ mastered_count }} / {{ total_count }} mastered</span>
+            <span>{% widthratio mastered_count total_count 100 %}%</span>
+        </div>
+        <progress
+            class="progress progress-success w-full h-3"
+            value="{{ mastered_count }}"
+            max="{{ total_count }}">
+        </progress>
+    </div>
+
+    <!-- Flag grid -->
+    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 w-full">
+        {% for entry in entries %}
+        <div class="flex flex-col items-center gap-1 group">
+            <div class="relative w-full rounded-sm overflow-hidden">
+                <img
+                    src="{{ entry.flag_image_url }}"
+                    alt="{{ entry.Country }}"
+                    class="w-full aspect-[3/2] object-contain drop-shadow-sm transition-opacity duration-200
+                        {% if entry.mastered %}opacity-100{% else %}opacity-40{% endif %}"
+                />
+                {% if not entry.mastered %}
+                <!-- Lock icon overlay on unmastered flags -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-base-content/40" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3A5.25 5.25 0 0 0 12 1.5Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+            <span class="text-xs text-center leading-tight
+                {% if entry.mastered %}text-base-content{% else %}text-base-content/30{% endif %}"
+                style="max-width: 4.5rem; overflow-wrap: break-word;">
+                {{ entry.Country }}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

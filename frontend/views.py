@@ -19,9 +19,43 @@ import requests
 # Create your views here.
 # Users who are not logged in can only access index, signup, and login
 
+"""
+The key used to store the country list in the cache
+
+The :v1 suffix is a versioning trick; if we ever change the shape of the
+dictionaries below (add a key, rename one), we bump this to :v2 and all
+old cached values simply age out on their own
+"""
+COUNTRIES_CACHE_KEY = 'countries:v1'
+
+"""
+How long (in seconds) to keep the cached list before Django discards it and
+re-queries the database
+
+The post_save/post_delete signals in models.py will also clear the cache immediately 
+whenever an admin edits a Country record
+"""
+COUNTRIES_CACHE_TTL = 60 * 60  # 1 hour
+
 def get_countries():
-    # Providing the exact dictionary structure as the original CSV (just a text list of countries) to minimize app changes
-    return [
+    """
+    1. Try the cache first
+    
+    cache.get() returns None on a cache miss
+    
+    On a hit it returns the previously stored list from RAM, no database round-trip
+    """
+    cached = cache.get(COUNTRIES_CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    """
+    2. Cache miss: query the database and build the list of dicts
+    
+    Original code path, now only reached on the very first
+    request (or after the cache expires / is invalidated by a signal)
+    """
+    result = [
         {
             'Country': c.name,
             'Flag': c.flag_emoji,
@@ -36,6 +70,13 @@ def get_countries():
         }
         for c in Country.objects.all().order_by('name')
     ]
+
+    """
+    3. Store the result in the cache so every subsequent call within the
+    TTL window returns the in-memory copy instead of hitting the DB
+    """
+    cache.set(COUNTRIES_CACHE_KEY, result, COUNTRIES_CACHE_TTL)
+    return result
 
 def index(request):
     countries = get_countries()
@@ -146,22 +187,52 @@ def country(request, country_name):
 
 @login_required
 def quiz(request):
-    countries = get_countries()
-    message = ""
-
     """
     Reworked to use session data instead of hidden form fields
-    Hidden form fields are vulnerable to CSRF attacks, session data is not
     
-    request.session is a dictionary-like object. We set keys on it just like a regular dict. Django automatically saves it and associates it with this user's session ID
+    Hidden form fields are vulnerable to tampering (a player could edit the streak value in DevTools)
+    
+    Session data is stored server-side so only the server can modify it
+
+    request.session is a dictionary-like object. We set keys on it just like a regular dict. 
+    
+    Django automatically saves it and associates it with this user's session ID cookie
     """
     if request.method == "GET":
+        """
+        After a POST guess, the POST handler redirects here and leaves a 'quiz_result' key in the session with the outcome of that guess
+        
+        pop() reads it and immediately removes it so a second refresh won't re-display it 
+        (it's consumed exactly once, like a flash message)
+        """
+        result = request.session.pop('quiz_result', None)
+
+        if result:
+            # Continuing an in-progress game after a guess redirect.
+            # The POST already chose the next country and wrote it to the session,
+            # so we don't need to touch get_countries() at all here.
+            random_country = request.session.get('quiz_country')
+            streak = request.session.get('quiz_streak', 0)
+            collected_flags = request.session.get('quiz_collected_flags', [])
+            return render(request, 'quiz.html', context={
+                'random_country': random_country,
+                'streak': streak,
+                'collected_flags': collected_flags,
+                'game_over': result['game_over'],
+                'final_streak': result['final_streak'],
+                'final_collected_flags': result['final_collected_flags'],
+                'truth_name': result['truth_name'],
+                'truth_flag': result['truth_flag'],
+            })
+
+        # Fresh page load — reset all game state.
+        countries = get_countries()
         random_country = random.choice(countries) if countries else None
         request.session['quiz_country'] = random_country
         request.session['quiz_streak'] = 0
         request.session['quiz_collected_flags'] = []
+        request.session['quiz_collected_names'] = [] # Make sure user doesn't get the same country twice
         return render(request, 'quiz.html', context={
-            'countries': countries,
             'random_country': random_country,
             'streak': 0,
             'collected_flags': [],
@@ -169,12 +240,15 @@ def quiz(request):
 
     elif request.method == "POST":
         """
-        # Read game state from the server-side session, not from POST data
-        # request.session.get(key, default) reads the value back from the server-side session
+        Read game state from the server-side session, not from POST data
+        
+        request.session.get(key, default) reads the value back from the
+        server-side session that was stored on the previous GET/POST
         """
         truth = request.session.get('quiz_country')
         streak = request.session.get('quiz_streak', 0)
         collected_flags = request.session.get('quiz_collected_flags', [])
+        collected_names = request.session.get('quiz_collected_names', [])
 
         if not truth:
             return redirect('quiz')
@@ -184,8 +258,8 @@ def quiz(request):
         truth_flag = truth.get('flag_image_url') or truth['Flag']
 
         user = request.user
-        update_fields = ['games_played']
-        user.games_played = F('games_played') + 1
+        
+        update_fields = []
 
         game_over = False
         final_streak = 0
@@ -194,56 +268,91 @@ def quiz(request):
         if truth_name.lower() == guess.lower():
             streak += 1
             collected_flags = collected_flags + [truth_flag]
+            collected_names = collected_names + [truth_name]
 
             if streak > user.high_score:
                 user.high_score = streak
                 update_fields.append('high_score')
 
-            message = f"Correct 🥳 It was {truth_name}!"
-            messages.success(request, message)
+            messages.success(request, f"Correct 🥳 It was {truth_name}!")
 
         else:
             game_over = True
             final_streak = streak
             final_collected_flags = collected_flags[:]
+            """
+            # Permanently record every flag the player collected this game
+            """
+            if collected_names:
+                mastered = Country.objects.filter(name__in=collected_names)
+                # *mastered is a list unpacking operation, it unpacks the list mastered into 
+                # the user.mastered_flags.add() method
+                user.mastered_flags.add(*mastered)
             streak = 0
             collected_flags = []
-            message = f"Noooo 😢 it was {truth_name}"
-            messages.error(request, message)
+            collected_names = []
+            user.games_played = F('games_played') + 1
+            update_fields.append('games_played')
+            messages.error(request, f"Noooo 😢 it was {truth_name}")
 
-        # Update the user's database record
-        user.save(update_fields=update_fields)
+        # Only hit the database if there is actually something to update
+        if update_fields:
+            user.save(update_fields=update_fields)
 
-        # After processing the guess, update the session
-        random_country = random.choice(countries) if countries else None
+        """
+        Pick the next country and write all game state back to the session
+        
+        Filter out countries already collected this game so the same flag never appears twice in a single streak
+        
+        If the player has somehow collected every country, fall back to the full list rather than crash
+        """
+        countries = get_countries()
+        available = [c for c in countries if c['Country'] not in collected_names]
+        if not available:
+            available = countries
+        random_country = random.choice(available)
         request.session['quiz_country'] = random_country
         request.session['quiz_streak'] = streak
         request.session['quiz_collected_flags'] = collected_flags
+        request.session['quiz_collected_names'] = collected_names
 
-        return render(request, 'quiz.html', context={
-            'countries': countries,
-            'random_country': random_country,
-            'streak': streak,
-            'message': message,
-            'collected_flags': collected_flags,
+        """
+        Store the result context in the session and redirect to GET so a browser refresh doesnt resubmit the form
+        
+        Without this, hitting refresh after a wrong guess would reprocess the same POST and double count games_played
+        """
+        request.session['quiz_result'] = {
             'game_over': game_over,
             'final_streak': final_streak,
             'final_collected_flags': final_collected_flags,
             'truth_name': truth_name,
-        })
+            'truth_flag': truth_flag,
+        }
+        return redirect('quiz')
 
     else:
-        random_country = random.choice(countries) if countries else None
-        return render(request, 'quiz.html', context={
-            'countries': countries,
-            'random_country': random_country,
-            'streak': 0,
-            'message': message,
-        })
+        return redirect('quiz')
     
 def leaderboard(request):
     top_players = Vexillologist.objects.order_by('-high_score')[:10]
     return render(request, 'leaderboard.html', {'top_players': top_players, 'current_user': request.user})
+
+@login_required
+def mastery(request):
+    countries = get_countries()
+    # Fetch just the names of countries this user has already mastered
+    # A flat list query is cheaper than loading full Country objects
+    mastered_names = set(request.user.mastered_flags.values_list('name', flat=True))
+    entries = [
+        # **c is a dictionary unpacking operation, it unpacks the dictionary c into the dictionary entries
+        {**c, 'mastered': c['Country'] in mastered_names}
+        for c in countries
+    ]
+    return render(request, 'mastery.html', {
+        'entries': entries,
+        'mastered_count': len(mastered_names),
+        'total_count': len(countries),
+    })
 
 def about(request):
     return render(request, 'about.html')
