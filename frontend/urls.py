@@ -13,6 +13,7 @@ urlpatterns = [
     path("search_guesses/", views.search_guesses, name="search_guesses"),
     path("country/<slug:country_name>/", views.country, name="country"),
     path("quiz/", views.quiz, name="quiz"),
+    path("quiz/change-gamemode/", views.change_gamemode, name="change_gamemode"),
     path("leaderboard/", views.leaderboard, name="leaderboard"),
     path("mastery/", views.mastery, name="mastery"),
     path("about/", views.about, name="about"),

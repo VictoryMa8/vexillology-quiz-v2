@@ -1,10 +1,161 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<!-- django.template.context_processors.auth is a default context processor, that automatically makes the user 
-variable available in all our templates rendered using render() -->
+
+{% if show_gamemode_select %}
+
+<!-- Gamemode Selection Screen -->
+<div class="flex flex-col items-center gap-8 w-full px-4 md:px-0 md:w-150 mt-8 mb-24">
+
+    <div class="text-center">
+        <h1 class="text-4xl font-bold">Choose a Game Mode</h1>
+        <p class="text-base-content/60 mt-2">Select how you want to play...</p>
+        {% if user.is_authenticated %}
+        <p class="text-lg mt-2">Your High Score: <span class="font-bold text-warning">{{ user.high_score }} ⭐</span></p>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+
+        <!-- World Tour (playable) -->
+        <form method="post" action="{% url 'quiz' %}" class="contents">
+            {% csrf_token %}
+            <input type="hidden" name="gamemode" value="world_tour">
+            <button type="submit"
+                class="card bg-base-200 border-2 border-success hover:shadow-lg hover:shadow-success/25 hover:bg-success/40 hover:text-success-content hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-left w-full">
+                <div class="card-body gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-4xl">🌍</span>
+                        <span class="badge badge-success badge-sm font-semibold">Playable</span>
+                    </div>
+                    <h2 class="card-title text-xl">World Tour</h2>
+                    <p class="text-sm text-base-content/60 leading-relaxed">
+                        Guess flags from countries and territories all over the world. Keep your streak alive and try to get on the leaderboard!
+                    </p>
+                </div>
+            </button>
+        </form>
+
+        <!-- North America Challenge (playable) -->
+        <form method="post" action="{% url 'quiz' %}" class="contents">
+            {% csrf_token %}
+            <input type="hidden" name="gamemode" value="north_america">
+            <button type="submit"
+                class="card bg-base-200 border-2 border-info hover:shadow-lg hover:shadow-info/25 hover:bg-info/20 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-left w-full">
+                <div class="card-body gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-4xl">🏔️</span>
+                        <span class="badge badge-info badge-sm font-semibold">Playable</span>
+                    </div>
+                    <h2 class="card-title text-xl">North America Challenge</h2>
+                    <p class="text-sm text-base-content/60 leading-relaxed">
+                        Guess all 27 flags from North America, Central America, and the Caribbean without a single mistake.
+                    </p>
+                </div>
+            </button>
+        </form>
+
+        <!-- Africa Challenge (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">🦒</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">Africa Challenge</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Guess all flags from Africa. Part of the continent challenge series.
+                </p>
+            </div>
+        </div>
+
+        <!-- Asia Challenge (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">🏯</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">Asia Challenge</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Guess all flags from Asia. Part of the continent challenge series.
+                </p>
+            </div>
+        </div>
+
+        <!-- Europe Challenge (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">🇪🇺</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">Europe Challenge</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Guess all flags from Europe. Part of the continent challenge series.
+                </p>
+            </div>
+        </div>
+
+        <!-- Oceania Challenge (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">🌴</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">Oceania Challenge</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Guess all flags from Oceania. Part of the continent challenge series.
+                </p>
+            </div>
+        </div>
+
+        <!-- South America Challenge (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">🦎</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">South America Challenge</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Guess all flags from South America. Part of the continent challenge series.
+                </p>
+            </div>
+        </div>
+
+        <!-- Speed Round (locked) -->
+        <div class="card bg-base-200 border-2 border-base-300 opacity-45 cursor-not-allowed text-left">
+            <div class="card-body gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-4xl">⏱️</span>
+                    <span class="badge badge-ghost badge-sm">Coming Soon</span>
+                </div>
+                <h2 class="card-title text-xl">Speed Round</h2>
+                <p class="text-sm text-base-content/60 leading-relaxed">
+                    Race against the clock. Answer as many flags as you can before time runs out.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% else %}
+
+<!-- Active Game -->
 <h1 class="text-4xl mt-8 font-bold text-center px-4">Are you a true Vexillologist? Let's find out!</h1>
-<h1 class="text-3xl text-center mt-4 mb-8">Your Highscore: {{ user.high_score }} ⭐️</h1>
+<h1 class="text-3xl text-center my-4">Your Highscore: {{ user.high_score }} ⭐️</h1>
+
+<!-- Change Game Mode button (in-game) -->
+<div class="flex justify-center mb-4">
+    <button
+        onclick="document.getElementById('change_gamemode_modal').showModal()"
+        class="btn btn-warning">
+        🔄 Change Game Mode
+    </button>
+</div>
 
 <div class="flex flex-col gap-4 w-full px-4 md:px-0 md:w-150 mb-24">
     <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8">
@@ -43,6 +194,9 @@ variable available in all our templates rendered using render() -->
         </form>
 
         <h1 class="text-2xl mt-4 font-bold">Streak: {{ streak }}🔥</h1>
+        {% if pool_size %}
+        <p class="text-xl text-base-content mt-2">{{ streak }} / {{ pool_size }} flags named</p>
+        {% endif %}
     </div>
 
     <div class="flex flex-col items-center border-success border-1 rounded-2xl p-8 md:h-130 overflow-y-auto">
@@ -57,21 +211,49 @@ variable available in all our templates rendered using render() -->
     </div>
 </div>
 
-<!-- Game over modal -->
-{% if game_over %}
+<!-- Change Gamemode Warning Modal -->
+<dialog id="change_gamemode_modal" class="modal">
+    <div class="modal-box flex flex-col items-center gap-4">
+        <h3 class="text-xl font-bold text-center">⚠️ Change Game Mode?</h3>
+        <p class="text-center text-base-content/75">
+            Changing the game mode will <span class="text-error font-semibold">forfeit your current game</span> and reset your streak.
+        </p>
+        <div class="modal-action w-full justify-center mt-0 gap-3">
+            <form method="dialog">
+                <button class="btn btn-ghost">Cancel</button>
+            </form>
+            <a href="{% url 'change_gamemode' %}" class="btn btn-error">Forfeit & Change</a>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>Close</button>
+    </form>
+</dialog>
+
+<!-- Game over / victory modal -->
+{% if game_over or game_won %}
 <dialog id="game_over_modal" class="modal">
     <div class="modal-box flex flex-col items-center gap-4">
+
+        {% if game_won %}
+        <!-- Victory header -->
+        <h3 class="text-2xl font-bold text-center text-success">🎉 You won the {{ gamemode_name }} Challenge!</h3>
+        <p class="text-center text-base-content/70 text-sm">You named every single flag without a mistake. Amazing job!</p>
+        {% else %}
+        <!-- Defeat header -->
         <h3 class="text-2xl font-bold text-center">Game Over 😢 It was <span class="text-error">{{ truth_name }} 🚩</span></h3>
         <img src="{{ truth_flag }}" class="h-18 w-auto inline-block drop-shadow-sm rounded-sm" alt="Flag">
+        {% endif %}
+
         <div class="divider my-0"></div>
 
         <div class="flex flex-col sm:flex-row gap-6 items-center justify-center w-full">
             <div class="flex flex-col items-center">
-                <span class="text-4xl font-bold text-warning mt-0">{{ final_streak }}</span>
-                <span class="text-sm text-base-content mt-1">Streak 🔥</span>
+                <span class="text-4xl font-bold {% if game_won %}text-success{% else %}text-warning{% endif %} mt-0">{{ final_streak }}</span>
+                <span class="text-sm text-base-content mt-1">{% if game_won %}Flags Named 🚩{% else %}Streak 🔥{% endif %}</span>
             </div>
             <div class="flex flex-col items-center">
-                <span class="text-4xl font-bold text-success mt-0">{{ user.high_score }}</span>
+                <span class="text-4xl font-bold text-warning mt-0">{{ user.high_score }}</span>
                 <span class="text-sm text-base-content mt-1">High Score ⭐</span>
             </div>
         </div>
@@ -89,10 +271,11 @@ variable available in all our templates rendered using render() -->
             {% endif %}
         </div>
 
-        <div class="modal-action w-full justify-center mt-0">
-            <form method="dialog">
+        <div class="modal-action w-full justify-center mt-0 gap-2 flex-wrap">
+            <form method="dialog" class="flex gap-2 flex-wrap justify-center">
                 <button class="btn btn-success px-8">Play Again</button>
                 <a href="{% url 'mastery' %}" class="btn btn-primary px-8">See Mastery</a>
+                <a href="{% url 'change_gamemode' %}" class="btn btn-warning px-6">Change Mode</a>
             </form>
         </div>
     </div>
@@ -130,5 +313,7 @@ variable available in all our templates rendered using render() -->
         }
     });
 </script>
+
+{% endif %}
 
 {% endblock %}

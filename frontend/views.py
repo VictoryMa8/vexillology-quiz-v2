@@ -78,6 +78,31 @@ def get_countries():
     cache.set(COUNTRIES_CACHE_KEY, result, COUNTRIES_CACHE_TTL)
     return result
 
+
+# Countries in the DB use a single 'Americas' region for all of the Western Hemisphere
+# We split it manually so continent-level gamemodes can be more precise
+NORTH_AMERICA_NAMES = {
+    'Antigua and Barbuda', 'Bahamas', 'Barbados', 'Belize', 'Canada',
+    'Costa Rica', 'Cuba', 'Dominica', 'Dominican Republic', 'El Salvador',
+    'Greenland', 'Grenada', 'Guatemala', 'Haiti', 'Honduras', 'Jamaica',
+    'Mexico', 'Nicaragua', 'Nunavut', 'Panama', 'Puerto Rico', 'Quebec',
+    'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines',
+    'Trinidad and Tobago', 'United States',
+}
+
+GAMEMODES = {
+    'world_tour': {
+        'name': 'World Tour',
+        # lambda is used to create an anonymous function that returns the countries list
+        'filter': lambda countries: countries,
+    },
+    'north_america': {
+        'name': 'North America',
+        # countries only from North America
+        'filter': lambda countries: [c for c in countries if c['Country'] in NORTH_AMERICA_NAMES],
+    },
+}
+
 def index(request):
     countries = get_countries()
     return render(request, 'index.html', context={'countries': countries })
@@ -125,7 +150,7 @@ def signup(request):
 
 def login_view(request):
     if request.method == 'POST':
-        # request.META contains all the metadata of the HTTP request (the HTTP headers) that is coming to our Django server, it can contain the user agent, ip address, content type, and so on.
+        # request.META contains all the metadata of the HTTP request (the HTTP headers) that is coming to our Django server, it can contain the user agent, ip address, content type, and so on
         
         # REMOTE_ADDR is the key for the connecting IP address, we use it to identify who is making the request
         # Otherwise unknown
@@ -206,11 +231,14 @@ def quiz(request):
         (it's consumed exactly once, like a flash message)
         """
         result = request.session.pop('quiz_result', None)
+        # Get the gamemode key from the session, default to world_tour if not set
+        gamemode_key = request.session.get('quiz_gamemode', 'world_tour')
+        gamemode_name = GAMEMODES.get(gamemode_key, GAMEMODES['world_tour'])['name']
 
         if result:
-            # Continuing an in-progress game after a guess redirect.
+            # Continuing an in-progress game after a guess redirect
             # The POST already chose the next country and wrote it to the session,
-            # so we don't need to touch get_countries() at all here.
+            # so we don't need to touch get_countries() at all here
             random_country = request.session.get('quiz_country')
             streak = request.session.get('quiz_streak', 0)
             collected_flags = request.session.get('quiz_collected_flags', [])
@@ -219,26 +247,44 @@ def quiz(request):
                 'streak': streak,
                 'collected_flags': collected_flags,
                 'game_over': result['game_over'],
+                'game_won': result.get('game_won', False),
                 'final_streak': result['final_streak'],
                 'final_collected_flags': result['final_collected_flags'],
-                'truth_name': result['truth_name'],
-                'truth_flag': result['truth_flag'],
+                'truth_name': result.get('truth_name', ''),
+                'truth_flag': result.get('truth_flag', ''),
+                'gamemode_name': gamemode_name,
+                'pool_size': request.session.get('quiz_pool_size', 0),
             })
 
-        # Fresh page load — reset all game state.
-        countries = get_countries()
-        random_country = random.choice(countries) if countries else None
+        # No gamemode selected yet - show the gamemode selection screen
+        if 'quiz_gamemode' not in request.session:
+            return render(request, 'quiz.html', context={'show_gamemode_select': True})
+
+        # Fresh page load with a gamemode set - reset all game state
+        gm = GAMEMODES.get(gamemode_key, GAMEMODES['world_tour'])
+        pool = gm['filter'](get_countries())
+        random_country = random.choice(pool) if pool else None
         request.session['quiz_country'] = random_country
         request.session['quiz_streak'] = 0
         request.session['quiz_collected_flags'] = []
-        request.session['quiz_collected_names'] = [] # Make sure user doesn't get the same country twice
+        request.session['quiz_collected_names'] = []
         return render(request, 'quiz.html', context={
             'random_country': random_country,
             'streak': 0,
             'collected_flags': [],
+            'gamemode_name': gamemode_name,
+            'pool_size': request.session.get('quiz_pool_size', 0),
         })
 
     elif request.method == "POST":
+        # Handle gamemode selection (submitted from the gamemode picker screen)
+        gamemode = request.POST.get('gamemode')
+        if gamemode:
+            gm = GAMEMODES.get(gamemode, GAMEMODES['world_tour'])
+            pool = gm['filter'](get_countries())
+            request.session['quiz_gamemode'] = gamemode
+            request.session['quiz_pool_size'] = len(pool)
+            return redirect('quiz')
         """
         Read game state from the server-side session, not from POST data
         
@@ -258,10 +304,13 @@ def quiz(request):
         truth_flag = truth.get('flag_image_url') or truth['Flag']
 
         user = request.user
-        
+        gamemode_key = request.session.get('quiz_gamemode', 'world_tour')
+        pool_size = request.session.get('quiz_pool_size', 0)
+
         update_fields = []
 
         game_over = False
+        game_won = False
         final_streak = 0
         final_collected_flags = []
 
@@ -274,19 +323,28 @@ def quiz(request):
                 user.high_score = streak
                 update_fields.append('high_score')
 
-            messages.success(request, f"Correct 🥳 It was {truth_name}!")
+            # Win condition: player has guessed every country in the pool
+            if pool_size > 0 and len(collected_names) >= pool_size:
+                game_won = True
+                final_streak = streak
+                final_collected_flags = collected_flags[:]
+                if collected_names:
+                    mastered = Country.objects.filter(name__in=collected_names)
+                    user.mastered_flags.add(*mastered)
+                streak = 0
+                collected_flags = []
+                collected_names = []
+                user.games_played = F('games_played') + 1
+                update_fields.append('games_played')
+            else:
+                messages.success(request, f"Correct 🥳 It was {truth_name}!")
 
         else:
             game_over = True
             final_streak = streak
             final_collected_flags = collected_flags[:]
-            """
-            # Permanently record every flag the player collected this game
-            """
             if collected_names:
                 mastered = Country.objects.filter(name__in=collected_names)
-                # *mastered is a list unpacking operation, it unpacks the list mastered into 
-                # the user.mastered_flags.add() method
                 user.mastered_flags.add(*mastered)
             streak = 0
             collected_flags = []
@@ -299,39 +357,41 @@ def quiz(request):
         if update_fields:
             user.save(update_fields=update_fields)
 
-        """
-        Pick the next country and write all game state back to the session
-        
-        Filter out countries already collected this game so the same flag never appears twice in a single streak
-        
-        If the player has somehow collected every country, fall back to the full list rather than crash
-        """
-        countries = get_countries()
-        available = [c for c in countries if c['Country'] not in collected_names]
+        # Pick the next country from the gamemode pool, excluding already-collected ones
+        gm = GAMEMODES.get(gamemode_key, GAMEMODES['world_tour'])
+        pool = gm['filter'](get_countries())
+        available = [c for c in pool if c['Country'] not in collected_names]
         if not available:
-            available = countries
+            available = pool
         random_country = random.choice(available)
         request.session['quiz_country'] = random_country
         request.session['quiz_streak'] = streak
         request.session['quiz_collected_flags'] = collected_flags
         request.session['quiz_collected_names'] = collected_names
 
-        """
-        Store the result context in the session and redirect to GET so a browser refresh doesnt resubmit the form
-        
-        Without this, hitting refresh after a wrong guess would reprocess the same POST and double count games_played
-        """
+        # Store the result in the session and redirect to GET (prevents form resubmission on refresh)
         request.session['quiz_result'] = {
             'game_over': game_over,
+            'game_won': game_won,
             'final_streak': final_streak,
             'final_collected_flags': final_collected_flags,
-            'truth_name': truth_name,
-            'truth_flag': truth_flag,
+            'truth_name': truth_name if not game_won else '',
+            'truth_flag': truth_flag if not game_won else '',
         }
         return redirect('quiz')
 
     else:
         return redirect('quiz')
+
+
+@login_required
+def change_gamemode(request):
+    """Clear all quiz session state so the player is returned to the gamemode selection screen."""
+    for key in ['quiz_gamemode', 'quiz_country', 'quiz_streak',
+                'quiz_collected_flags', 'quiz_collected_names', 'quiz_result']:
+        request.session.pop(key, None)
+    return redirect('quiz')
+
     
 def leaderboard(request):
     top_players = Vexillologist.objects.order_by('-high_score')[:10]
